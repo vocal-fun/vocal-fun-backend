@@ -13,27 +13,32 @@ export const setupSocket = (io: Server) => {
         });
       });
 
-    let aiSocket = setupAISocket(io);
+      try {
+        let aiSocket = setupAISocket(io);
 
-    const callNamespace = io.of('/call');
-
-    callNamespace.on('connection', (socket) => {
-        console.log('Client connected via /call namespace');
-        
-        socket.onAny((event, data) => {
-            console.log(`Received event from client: ${event}`, data);
+        const callNamespace = io.of('/call');
     
-            // Send the event data to the Python WebSocket server
-            if (aiSocket.readyState === WebSocket.OPEN) {
-                // Forward the message to the Python WebSocket server
-                aiSocket.send(JSON.stringify({ type: event, data: data }));
-            }
+        callNamespace.on('connection', (socket) => {
+            console.log('Client connected via /call namespace');
+            
+            socket.onAny((event, data) => {
+                console.log(`Received event from client: ${event}`, data);
+        
+                // Send the event data to the Python WebSocket server
+                if (aiSocket.readyState === WebSocket.OPEN) {
+                    // Forward the message to the Python WebSocket server
+                    aiSocket.send(JSON.stringify({ type: event, data: data }));
+                }
+            });
+    
+            socket.on('disconnect', () => {
+                console.log('Client disconnected from /call namespace');
+            });
         });
-
-        socket.on('disconnect', () => {
-            console.log('Client disconnected from /call namespace');
-        });
-    });
+      } catch (e) {
+        console.log(e)
+      }
+   
 
 }
 
