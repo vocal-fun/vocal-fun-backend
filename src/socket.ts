@@ -4,17 +4,26 @@ export const setupSocket = (io: Server) => {
     io.on('connection', (socket) => {
         console.log('Client connected via Socket.IO');
       
-        // Send message to the client
-        socket.emit('message', 'Hello from Socket.IO server!');
-      
-        // Receive message from the client
         socket.on('message', (message) => {
           console.log('Received:', message);
         });
-      
-        // Handle disconnection
-        socket.on('disconnect', () => {
+              socket.on('disconnect', () => {
           console.log('Client disconnected');
         });
       });
+
+    const callNamespace = io.of('/call');
+
+    callNamespace.on('connection', (socket) => {
+    console.log('Client connected via /call namespace');
+    
+
+    socket.on('message', (message) => {
+        console.log('Received on /call:', message);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected from /call namespace');
+    });
+    });
 }
