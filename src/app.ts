@@ -10,6 +10,7 @@ import * as callRoutes from './routes/call';
 import * as userRoutes from './routes/user';
 import * as vocalRoutes from './routes/vocal';
 import { setupSocket } from './socket';
+import { vocalCreditListener } from './services/vocalService';
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/v1/user', userRoutes.router);
 app.use('/api/v1/call', callRoutes.router);
 app.use('/api/v1/vocal', vocalRoutes.router);
 
+// vocalCreditListener();
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
