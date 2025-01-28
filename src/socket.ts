@@ -18,21 +18,21 @@ export const setupSocket = (io: Server) => {
     const callNamespace = io.of('/call');
 
     callNamespace.on('connection', (socket) => {
-    console.log('Client connected via /call namespace');
+        console.log('Client connected via /call namespace');
+        
+        socket.onAny((event, data) => {
+            console.log(`Received event from client: ${event}`, data);
     
-
-    socket.on('message', (message) => {
-        console.log('Received on /call:', message);
-
-        console.log('Received from client:', message);
+            // Send the event data to the Python WebSocket server
             if (aiSocket.readyState === WebSocket.OPEN) {
-                aiSocket.send(message);
+                // Forward the message to the Python WebSocket server
+                aiSocket.send(JSON.stringify({ event, data }));
             }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected from /call namespace');
-    });
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('Client disconnected from /call namespace');
+        });
     });
 
 }
