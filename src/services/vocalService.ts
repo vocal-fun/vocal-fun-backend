@@ -2,6 +2,7 @@ import { CreditTransaction } from '../models/vocal';
 import { ethers, WebSocketProvider, BigNumberish, formatUnits, Contract } from 'ethers';
 import { getUserProfile } from './userService';
 import { User } from '../models/user';
+import { sendUserSocketMessage } from '../socket';
 
 interface PaymentMethod {
     name: string;
@@ -101,7 +102,11 @@ const processTransaction = async (
             { $inc: { balance: creditAmount } }
         );
 
+        let newUser = await getUserProfile(from);
+
         console.log(`Successfully processed ${token} credit purchase for user ${from}`);
+
+        sendUserSocketMessage(user.address, 'balance_update', { balance: newUser?.balance });
 
     } catch (error) {
         console.error('Error processing credit transaction:', error);

@@ -1,75 +1,102 @@
 import { Server } from 'socket.io';
 import WebSocket from 'ws';  // WebSocket client library for connecting to Python server
 import { getValidatedSession } from './services/callService';
+import { decodeJwt } from './middleware/auth';
+
+let userIo: any;
+let callIo: any
 
 export const setupSocket = (io: Server) => {
-    io.on('connection', (socket) => {
+    userIo = io;
+
+    io.on('connection', async (socket) => {
         console.log('Client connected via Socket.IO');
-      
-        socket.on('message', (message) => {
-          console.log('Received:', message);
+        newSocketConnection(socket);
+    });
+
+    try {
+        callIo = io.of('/call');
+        callIo.on('connection', async (socket: any) => {
+            newCallSocketConnection(socket);
         });
-              socket.on('disconnect', () => {
-          console.log('Client disconnected');
-        });
-      });
-
-      return
-
-      try {
-        let aiSocket = setupAISocket(io);
-
-        const callNamespace = io.of('/call');
-    
-        callNamespace.on('connection', async (socket) => {
-            console.log('Client connected via /call namespace');
-
-            const sessionId = socket.handshake.query.sessionId as string;
-            let session = await getValidatedSession(sessionId);
-            if (!session) {
-                console.log('Invalid session ID');
-                socket.disconnect();
-                return;
-            }
-            let agentId = session.agentId;
-            let userId = session.userId;
-
-            socket.onAny((event, data) => {
-                console.log(`Received event from client: ${event}`, data);
-        
-                // Send the event data to the Python WebSocket server
-                if (aiSocket.readyState === WebSocket.OPEN) {
-                    // Forward the message to the Python WebSocket server
-                    aiSocket.send(JSON.stringify({ type: event, data: data }));
-                }
-            });
-    
-            socket.on('disconnect', () => {
-                console.log('Client disconnected from /call namespace');
-            });
-        });
-      } catch (e) {
+    } catch (e) {
         console.log(e)
-      }
-   
+    }
+}
 
+export const sendUserSocketMessage = (address: string, event: string, data: any) => {
+    userIo.to(address).emit(event, data);
+}
+
+const newSocketConnection = async (socket: any) => {
+    let token = socket.handshake.query.token;
+    let user = await decodeJwt(token);
+
+    let isAuthenticated = user && user.address;
+
+    console.log('User connected:', isAuthenticated ? user!.address : 'unauthenticated');
+
+    if (isAuthenticated && user) {
+        socket.join(user.address);
+    }
+
+    socket.on('message', (message: any) => {
+      console.log('Received:', message);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+    });
+}
+
+const newCallSocketConnection = async (socket: any) => {
+    console.log('Client connected via /call namespace');
+
+    let token = socket.handshake.query.token;
+    let user = await decodeJwt(token);
+
+    if (!user) {
+        console.log('Invalid token');
+        socket.disconnect();
+        return;
+    }
+
+    const sessionId = socket.handshake.query.sessionId as string;
+    let session = await getValidatedSession(sessionId);
+    if (!session) {
+        console.log('Invalid session ID');
+        socket.disconnect();
+        return;
+    }
+
+    let agentId = session.agentId;
+    let userId = session.userId;
+
+    let aiSocket = setupAISocket(callIo);
+
+    socket.onAny((event: any, data: any) => {
+        console.log(`Received event from client: ${event}`, data);
+        if (aiSocket.readyState === WebSocket.OPEN) {
+            aiSocket.send(JSON.stringify({ type: event, data: data }));
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected from /call namespace');
+    });
 }
 
 const setupAISocket = (io: Server) => {
-    // WebSocket connection to the Python WebSocket server
     console.log('Connecting to AI WebSocket server...');
     const pythonWs = new WebSocket('ws://15.206.168.54:8000/ws');
 
-    // Handle connection to Python WebSocket server
     pythonWs.on('open', () => {
-    console.log('Connected to Python WebSocket server');
+        console.log('Connected to Python WebSocket server');
     });
 
-    // Handle incoming messages from Python WebSocket server and forward to Socket.IO clients
     pythonWs.on('message', (message: any) => {
     console.log('Message from Python server:', message);
-        // Broadcast message to all connected Socket.IO clients in the /call namespace
-        io.of('/call').emit('message', message);
+        io.emit('message', message);
     });
 
     return pythonWs

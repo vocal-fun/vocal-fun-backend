@@ -17,6 +17,10 @@ export const authMiddleware = async (
     }
 
     const decoded = jwt.verify(token, config.jwt.secret) as { userId: string };
+    if (!decoded) {
+      res.status(401).json({ message: 'Invalid token' });
+      return;
+    }
     const user = await User.findById(decoded.userId);
     
     if (!user) {
@@ -45,6 +49,10 @@ export const optionalAuthMiddleware = async (
     }
 
     const decoded = jwt.verify(token, config.jwt.secret) as { userId: string };
+    if (!decoded) {
+      res.status(401).json({ message: 'Invalid token' });
+      return;
+    }
     const user = await User.findById(decoded.userId);
     req.user = user;
     next();
@@ -52,3 +60,12 @@ export const optionalAuthMiddleware = async (
     res.status(401).json({ message: 'Invalid token' });
   }
 };
+
+export const decodeJwt = async (token: string) => {
+    const decoded = jwt.verify(token, config.jwt.secret) as { userId: string };
+    if (!decoded) {
+        return null;
+    }
+    const user = await User.findById(decoded.userId);
+    return user;
+}

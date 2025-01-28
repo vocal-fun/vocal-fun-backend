@@ -39,7 +39,7 @@ app.use('/api/v1/user', userRoutes.router);
 app.use('/api/v1/call', callRoutes.router);
 app.use('/api/v1/vocal', vocalRoutes.router);
 
-// vocalCreditListener();
+vocalCreditListener();
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
