@@ -3,6 +3,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IAgent {
     _id: Types.ObjectId;
     name: string;
+    image: string;
     createdAt: Date;
     twitter: string;
     rate: number;
@@ -14,7 +15,11 @@ const agentSchema = new Schema<AgentDocument>({
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: false
+    },
+    image: {
+        type: String,
+        required: false
     },
     rate: {
         type: Number,
