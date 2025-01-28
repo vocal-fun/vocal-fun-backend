@@ -69,35 +69,39 @@ const newCallSocketConnection = async (socket: any) => {
         return;
     }
 
+    socket.join(sessionId);
+
     let agentId = session.agentId;
     let userId = session.userId;
 
-    let aiSocket = setupAISocket(callIo);
+    // ===== python AI socket =====
+    console.log('Connecting to AI WebSocket server...');
+    const pythonWs = new WebSocket('ws://15.206.168.54:8000/ws');
 
+    pythonWs.on('open', () => {
+        console.log('Connected to Python WebSocket server');
+        // send ready event to client when we are connected to AI server
+        socket.emit('call_ready')
+    });
+
+    pythonWs.on('message', (message: any) => {
+        console.log('Message from Python server:', message);
+        socket.emit('message', message);
+    });
+    // =============================
+
+
+    // ====== Call socket ======
     socket.onAny((event: any, data: any) => {
         console.log(`Received event from client: ${event}`, data);
-        if (aiSocket.readyState === WebSocket.OPEN) {
-            aiSocket.send(JSON.stringify({ type: event, data: data }));
+        if (pythonWs.readyState === WebSocket.OPEN) {
+            pythonWs.send(JSON.stringify({ type: event, data: data }));
         }
     });
 
     socket.on('disconnect', () => {
         console.log('Client disconnected from /call namespace');
     });
-}
+    // ================================
 
-const setupAISocket = (io: Server) => {
-    console.log('Connecting to AI WebSocket server...');
-    const pythonWs = new WebSocket('ws://15.206.168.54:8000/ws');
-
-    pythonWs.on('open', () => {
-        console.log('Connected to Python WebSocket server');
-    });
-
-    pythonWs.on('message', (message: any) => {
-    console.log('Message from Python server:', message);
-        io.emit('message', message);
-    });
-
-    return pythonWs
 }
