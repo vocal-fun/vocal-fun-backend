@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import WebSocket from 'ws';  // WebSocket client library for connecting to Python server
 import { getValidatedSession } from './services/callService';
 import { decodeJwt } from './middleware/auth';
+import { Agent } from './models/agent';
 
 let userIo: any;
 let callIo: any
@@ -90,11 +91,20 @@ const newCallSocketConnection = async (socket: any) => {
             return;
         }
 
-        socket.join(sessionId);
-
         let agentId = session.agentId;
         let userId = session.userId;
 
+        let agent = await Agent.findById(agentId);
+
+        if (!agent) {
+            console.log('Agent not found');
+            socket.disconnect(true);
+            return;
+        }
+
+        socket.join(sessionId);
+
+        console.log('new call socket connection', sessionId, agentId, userId, agent!.actualName);
         // Connect to Python AI WebSocket server with sessionId
         console.log('Connecting to AI WebSocket server...');
         const pythonWs = new WebSocket(`ws://15.206.168.54:8000/ws/${sessionId}`);
@@ -104,6 +114,11 @@ const newCallSocketConnection = async (socket: any) => {
 
         pythonWs.on('open', () => {
             console.log('Connected to Python WebSocket server');
+            pythonWs.send(JSON.stringify({
+                agentId: agentId,
+                agentName: agent!.actualName,
+                userId: userId
+            }));
             socket.emit('call_ready');
         });
 
