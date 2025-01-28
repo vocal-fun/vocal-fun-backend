@@ -1,23 +1,23 @@
 import jwt from 'jsonwebtoken';
-import { IUser, User } from '@/models/user';
-import { config } from '@/config';
-import { redis } from '@/config/redis';
+import { IUser, User } from '../models/user';
+import { config } from '../config';
+import { redis } from '../config/redis';
 import crypto from 'crypto';
-import { verifySignature } from '@/utils/web3utils';
+import { verifySignature } from '../utils/web3utils';
 
 export class AuthService {
   private static NONCE_EXPIRATION = 300; // 5 minutes
 
   static async generateNonce(address: string): Promise<string> {
-    const nonce = crypto.randomBytes(32).toString('hex');
-    const key = `nonce:${address.toLowerCase()}`;
+    const nonce = crypto.randomBytes(8).toString('hex');
+    const key = `vocal:nonce:${address.toLowerCase()}`;
     
     await redis.setex(key, this.NONCE_EXPIRATION, nonce);
     return nonce;
   }
 
   static async verifyNonce(address: string, nonce: string): Promise<boolean> {
-    const key = `nonce:${address.toLowerCase()}`;
+    const key = `vocal:nonce:${address.toLowerCase()}`;
     const storedNonce = await redis.get(key);
     
     if (!storedNonce || storedNonce !== nonce) {
@@ -54,12 +54,13 @@ export class AuthService {
   ): Promise<{ user: IUser; token: string } | null> {
     // Verify nonce
     const isNonceValid = await this.verifyNonce(address, nonce);
+    console.log(isNonceValid);
     if (!isNonceValid) {
       return null;
     }
 
     // Verify signature
-    const message = `Sign this message to authenticate: ${nonce}`;
+    const message = `You are logging in to Vocal.fun, sign this message to authenticate: ${nonce}`;
     const isSignatureValid = verifySignature(message, signature, address);
     if (!isSignatureValid) {
       return null;

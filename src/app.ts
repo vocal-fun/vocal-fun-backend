@@ -1,24 +1,29 @@
 import express from 'express';
 import cors from 'cors';
-import { config } from '@/config';
-import { connectDB } from '@/config/database';
-import * as authRoutes from '@/routes/auth';
-import * as publicRoutes from '@/routes/public';
-import * as protectedRoutes from '@/routes/protected';
+import { config } from './config';
+import { connectDB } from './config/database';
+import * as authRoutes from './routes/auth';
+import * as agentRountes from './routes/agents';
+import * as userRoutes from './routes/user';
 
 const app = express();
 
+// set port to 4040
+
+
 // Connect to MongoDB
 connectDB();
+
+
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes.router);
-app.use('/api/public', publicRoutes.router);
-app.use('/api/protected', protectedRoutes.router);
+app.use('/api/v1/auth', authRoutes.router);
+app.use('/api/v1/agents', agentRountes.router);
+app.use('/api/v1/user', userRoutes.router);
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

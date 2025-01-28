@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import { AuthService } from '@/services/authService';
-import { validate } from '@/middleware/validate';
-import { nonceSchema, verifySchema } from '@/schemas/auth.schema';
+import { AuthService } from '../services/authService';
+import { validate } from '../middleware/validate';
+import { nonceSchema, verifySchema } from '../schemas/auth.schema';
 
 export const router = Router();
 
-router.post('/nonce', validate(nonceSchema), async (req, res) => {
+router.post('/nonce', validate(nonceSchema), async (req: any, res) => {
   try {
     const { address } = req.body;
     const nonce = await AuthService.generateNonce(address);
-    const message = `Sign this message to authenticate: ${nonce}`;
+    const message = `You are logging in to Vocal.fun, sign this message to authenticate: ${nonce}`;
 
     res.json({ message, nonce });
   } catch (error) {
@@ -17,7 +17,7 @@ router.post('/nonce', validate(nonceSchema), async (req, res) => {
   }
 });
 
-router.post('/verify', validate(verifySchema), async (req, res) => {
+router.post('/verify', validate(verifySchema), async (req: any, res) => {
   try {
     const { address, signature, nonce } = req.body;
     

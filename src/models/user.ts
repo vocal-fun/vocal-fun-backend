@@ -3,6 +3,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IUser {
     _id: Types.ObjectId;
     address: string;
+    balance: number;
     createdAt: Date;
 }
 
@@ -13,6 +14,11 @@ const userSchema = new Schema<UserDocument>({
     type: String,
     required: true,
     unique: true
+  },
+  balance: {
+    type: Number,
+    required: true,
+    default: 0
   },
   createdAt: {
     type: Date,
