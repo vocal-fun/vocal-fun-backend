@@ -13,6 +13,8 @@ export const setupSocket = (io: Server) => {
         });
       });
 
+    let aiSocket = setupAISocket(io);
+
     const callNamespace = io.of('/call');
 
     callNamespace.on('connection', (socket) => {
@@ -21,6 +23,11 @@ export const setupSocket = (io: Server) => {
 
     socket.on('message', (message) => {
         console.log('Received on /call:', message);
+
+        console.log('Received from client:', message);
+            if (aiSocket.readyState === WebSocket.OPEN) {
+                aiSocket.send(message);
+            }
     });
 
     socket.on('disconnect', () => {
@@ -28,11 +35,11 @@ export const setupSocket = (io: Server) => {
     });
     });
 
-    setupAISocket(io);
 }
 
 const setupAISocket = (io: Server) => {
     // WebSocket connection to the Python WebSocket server
+    console.log('Connecting to AI WebSocket server...');
     const pythonWs = new WebSocket('ws://15.206.168.54:8000/ws');
 
     // Handle connection to Python WebSocket server
@@ -46,4 +53,6 @@ const setupAISocket = (io: Server) => {
         // Broadcast message to all connected Socket.IO clients in the /call namespace
         io.of('/call').emit('message', message);
     });
+
+    return pythonWs
 }
