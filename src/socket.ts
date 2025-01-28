@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import WebSocket from 'ws';  // WebSocket client library for connecting to Python server
+import { getValidatedSession } from './services/callService';
 
 export const setupSocket = (io: Server) => {
     io.on('connection', (socket) => {
@@ -13,31 +14,43 @@ export const setupSocket = (io: Server) => {
         });
       });
 
-    //   try {
-    //     let aiSocket = setupAISocket(io);
+      return
 
-    //     const callNamespace = io.of('/call');
+      try {
+        let aiSocket = setupAISocket(io);
+
+        const callNamespace = io.of('/call');
     
-    //     callNamespace.on('connection', (socket) => {
-    //         console.log('Client connected via /call namespace');
-            
-    //         socket.onAny((event, data) => {
-    //             console.log(`Received event from client: ${event}`, data);
+        callNamespace.on('connection', async (socket) => {
+            console.log('Client connected via /call namespace');
+
+            const sessionId = socket.handshake.query.sessionId as string;
+            let session = await getValidatedSession(sessionId);
+            if (!session) {
+                console.log('Invalid session ID');
+                socket.disconnect();
+                return;
+            }
+            let agentId = session.agentId;
+            let userId = session.userId;
+
+            socket.onAny((event, data) => {
+                console.log(`Received event from client: ${event}`, data);
         
-    //             // Send the event data to the Python WebSocket server
-    //             if (aiSocket.readyState === WebSocket.OPEN) {
-    //                 // Forward the message to the Python WebSocket server
-    //                 aiSocket.send(JSON.stringify({ type: event, data: data }));
-    //             }
-    //         });
+                // Send the event data to the Python WebSocket server
+                if (aiSocket.readyState === WebSocket.OPEN) {
+                    // Forward the message to the Python WebSocket server
+                    aiSocket.send(JSON.stringify({ type: event, data: data }));
+                }
+            });
     
-    //         socket.on('disconnect', () => {
-    //             console.log('Client disconnected from /call namespace');
-    //         });
-    //     });
-    //   } catch (e) {
-    //     console.log(e)
-    //   }
+            socket.on('disconnect', () => {
+                console.log('Client disconnected from /call namespace');
+            });
+        });
+      } catch (e) {
+        console.log(e)
+      }
    
 
 }

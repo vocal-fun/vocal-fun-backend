@@ -29,3 +29,12 @@ export const startCall = async (userId: string, agentId: string) => {
 
     return newSession;
 }
+
+export const getValidatedSession = async (sessionId: string) => {
+    let session = await CallSession.findOne({ _id: sessionId });
+    if (!session) {
+        console.log('Session not found');
+       return null
+    }
+    return session
+}
