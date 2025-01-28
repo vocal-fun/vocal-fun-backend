@@ -37,28 +37,36 @@ export const sendUserSocketMessage = (address: string, event: string, data: any)
 }
 
 const newSocketConnection = async (socket: any) => {
-    let token = socket.handshake.auth.token;
-    let user = await decodeJwt(token);
-
-    let isAuthenticated = user && user.address;
-
-    console.log('User connected:', isAuthenticated ? user!.address : 'unauthenticated');
-
-    if (isAuthenticated && user) {
-        socket.join(user.address);
+    try {
+        let token = socket.handshake.auth.token;
+        let user = await decodeJwt(token);
+    
+        let isAuthenticated = user && user.address;
+    
+        console.log('User connected:', isAuthenticated ? user!.address : 'unauthenticated');
+    
+        if (isAuthenticated && user) {
+            socket.join(user.address);
+        }
+    
+        socket.on('message', (message: any) => {
+          console.log('Received:', message);
+        });
+    
+        socket.on('disconnect', () => {
+          console.log('Client disconnected');
+        });
+    } catch (e) {
+        console.log(e)
+        socket.disconnect();
     }
-
-    socket.on('message', (message: any) => {
-      console.log('Received:', message);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Client disconnected');
-    });
 }
+   
 
 const newCallSocketConnection = async (socket: any) => {
-    console.log('Client connected via /call namespace');
+    try {
+
+        console.log('Client connected via /call namespace');
 
     let token = socket.handshake.auth.token;
     let user = await decodeJwt(token);
@@ -111,5 +119,9 @@ const newCallSocketConnection = async (socket: any) => {
         console.log('Client disconnected from /call namespace');
     });
     // ================================
+    } catch (e) {
+        console.log(e)
+        socket.disconnect();
+    }
 
 }
