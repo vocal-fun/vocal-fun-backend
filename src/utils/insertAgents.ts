@@ -1,4 +1,4 @@
-import { Agent } from "../models/agent";
+import { Agent, AgentVoicePreview } from "../models/agent";
 
 export const insertAgents = async () => {
     let agents = [
@@ -76,4 +76,85 @@ export const insertAgents = async () => {
         await newAgent.save();
         console.log(`Inserted: ${agent.displayName}`);
     });
+}
+
+
+export const insertAgentVoicePreviews =async () => {
+   
+    let voicePreviews = [
+        {
+          "name": "trump-joker",
+          "displayName": "Trump joker",
+          "voicePreview": "Make America great again!"
+        },
+        {
+          "name": "buterin",
+          "displayName": "Vitaly",
+          "voicePreview": "Vitaly here, spreading good vibes!"
+        },
+        {
+          "name": "cz-jailed",
+          "displayName": "Jailed CZ",
+          "voicePreview": "The market will rise again, mark my words."
+        },
+        {
+          "name": "jeethotline",
+          "displayName": "Jeethotline",
+          "voicePreview": "Dial me for advice, I’ve got answers."
+        },
+        {
+          "name": "mao",
+          "displayName": "Mao",
+          "voicePreview": "Power comes from the people!"
+        },
+        {
+          "name": "putin",
+          "displayName": "Putin",
+          "voicePreview": "Russia will always rise stronger."
+        },
+        {
+          "name": "do-kwon",
+          "displayName": "Dokwon",
+          "voicePreview": "We’ll build the future, one block at a time."
+        },
+        {
+          "name": "luffy-d",
+          "displayName": "luffy D monkey",
+          "voicePreview": "I’m going to be the Pirate King!"
+        },
+        {
+          "name": "justin-sun",
+          "displayName": "tronman3000",
+          "voicePreview": "Tron to the moon!"
+        },
+        {
+          "name": "elon",
+          "displayName": "elonmusk",
+          "voicePreview": "Let’s make humanity multi-planetary."
+        },
+        {
+          "name": "banks",
+          "displayName": "sbf",
+          "voicePreview": "The future is decentralized."
+        },
+        {
+          "name": "coinbald",
+          "displayName": "coinbald",
+          "voicePreview": "Crypto is the future, let's go."
+        }
+      ]
+
+      let agents: any = await Agent.find();
+
+      voicePreviews.forEach(async (preview) => {
+        let agent: any = agents.find((agent: any) => agent.name === preview.displayName);
+        const newAgent = new AgentVoicePreview({
+            agentId: agent._id,
+            text: preview.voicePreview
+        });
+  
+        await newAgent.save();
+        console.log(`Inserted: ${agent.name} ${preview.voicePreview}`);
+    });
+      
 }
