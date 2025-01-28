@@ -26,7 +26,11 @@ const io = new Server(server, {
   },
 });
 
-setupSocket(io);
+try {
+  setupSocket(io);
+} catch (e) {
+  console.log(e)
+}
 
 // Middleware
 // app.use(cors());

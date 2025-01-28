@@ -11,13 +11,21 @@ export const setupSocket = (io: Server) => {
 
     io.on('connection', async (socket) => {
         console.log('Client connected via Socket.IO');
-        newSocketConnection(socket);
+        try {
+            newSocketConnection(socket);
+        } catch (e) {
+            console.log(e)
+        }
     });
 
     try {
         callIo = io.of('/call');
         callIo.on('connection', async (socket: any) => {
-            newCallSocketConnection(socket);
+            try {
+                newCallSocketConnection(socket);
+            } catch (e) {
+                console.log(e)
+            }
         });
     } catch (e) {
         console.log(e)

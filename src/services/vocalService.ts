@@ -163,6 +163,5 @@ export const vocalCreditListener = async (): Promise<void> => {
         console.log('Watching for filtered USDC and USDT transfers on Base chain...');
     } catch (error) {
         console.error('Error initializing vocal credit listener:', error);
-        throw error;
     }
 };
