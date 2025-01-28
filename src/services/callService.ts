@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { CallSession } from "../models/call";
 import { getAgent } from "./agentsService";
 import { getUserById } from "./userService";
@@ -31,9 +32,9 @@ export const startCall = async (userId: string, agentId: string) => {
 }
 
 export const getValidatedSession = async (sessionId: string) => {
-    let session = await CallSession.findOne({ _id: sessionId });
+    let session = await CallSession.findOne({ _id: new Types.ObjectId(sessionId) });
     if (!session) {
-        console.log('Session not found');
+        console.log('Session not found', sessionId);
        return null
     }
     return session
