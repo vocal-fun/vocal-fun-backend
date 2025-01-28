@@ -69,10 +69,10 @@ const newCallSocketConnection = async (socket: any) => {
         console.log('Client connected via /call namespace');
 
     let token = socket.handshake.auth.token;
-    
+
     if (!token) {
         console.log('Authentication required');
-        socket.disconnect();
+        socket.disconnect(true);
         return;
     }
     
@@ -80,7 +80,7 @@ const newCallSocketConnection = async (socket: any) => {
 
     if (!user) {
         console.log('Invalid token');
-        socket.disconnect();
+        socket.disconnect(true);
         return;
     }
 
@@ -88,7 +88,7 @@ const newCallSocketConnection = async (socket: any) => {
     let session = await getValidatedSession(sessionId);
     if (!session) {
         console.log('Invalid session ID');
-        socket.disconnect();
+        socket.disconnect(true);
         return;
     }
 
