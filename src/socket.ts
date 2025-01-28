@@ -113,9 +113,11 @@ const newCallSocketConnection = async (socket: any) => {
                 const data = JSON.parse(message.toString());
                 
                 if (data.type === 'tts_stream') {
+                    console.log('Received TTS stream:', data.data.length);
                     // Forward TTS audio chunks to client
                     socket.emit('tts_stream', data.data);
                 } if (data.type === 'tts_stream_end') {
+                    console.log('Received TTS stream end');
                     // notify client that TTS stream has ended
                     socket.emit('tts_stream_end');
                 } else {
@@ -139,6 +141,7 @@ const newCallSocketConnection = async (socket: any) => {
 
         // Handle incoming events from client
         socket.on('audio_data', (audioChunk: ArrayBuffer) => {
+            console.log('Received audio chunk:', audioChunk.byteLength);
             if (pythonWs.readyState === WebSocket.OPEN) {
                 // Forward audio chunk to Python server
                 pythonWs.send(audioChunk);
@@ -146,6 +149,7 @@ const newCallSocketConnection = async (socket: any) => {
         });
 
         socket.on('speech_start', () => {
+            console.log('Received speech start');
             if (pythonWs.readyState === WebSocket.OPEN && !isSpeaking) {
                 isSpeaking = true;
                 pythonWs.send(JSON.stringify({ 
@@ -155,6 +159,7 @@ const newCallSocketConnection = async (socket: any) => {
         });
 
         socket.on('speech_end', () => {
+            console.log('Received speech start');
             if (pythonWs.readyState === WebSocket.OPEN && isSpeaking) {
                 isSpeaking = false;
                 pythonWs.send(JSON.stringify({ 
