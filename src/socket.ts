@@ -69,6 +69,13 @@ const newCallSocketConnection = async (socket: any) => {
         console.log('Client connected via /call namespace');
 
     let token = socket.handshake.auth.token;
+    
+    if (!token) {
+        console.log('Authentication required');
+        socket.disconnect();
+        return;
+    }
+    
     let user = await decodeJwt(token);
 
     if (!user) {
