@@ -8,6 +8,7 @@ import * as authRoutes from './routes/auth';
 import * as agentRountes from './routes/agents';
 import * as callRoutes from './routes/call';
 import * as userRoutes from './routes/user';
+import * as vocalRoutes from './routes/vocal';
 import { setupSocket } from './socket';
 
 const app = express();
@@ -35,6 +36,8 @@ app.use('/api/v1/auth', authRoutes.router);
 app.use('/api/v1/agents', agentRountes.router);
 app.use('/api/v1/user', userRoutes.router);
 app.use('/api/v1/call', callRoutes.router);
+app.use('/api/v1/vocal', vocalRoutes.router);
+
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
