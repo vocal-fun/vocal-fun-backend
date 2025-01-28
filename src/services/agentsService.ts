@@ -10,6 +10,11 @@ export const getAllAgents = async () => {
     return agents
 }
 
+export const getAgent = async (agentId: string) => {
+    let agent = await Agent.findOne({ _id: agentId });
+    return agent;
+}
+
 export const getAgentPreviewVoiceline = async (agentId: string) => {
     try {
         await fs.mkdir(VOICE_PREVIEWS_DIR, { recursive: true });

@@ -6,6 +6,7 @@ import { config } from './config';
 import { connectDB } from './config/database';
 import * as authRoutes from './routes/auth';
 import * as agentRountes from './routes/agents';
+import * as callRoutes from './routes/call';
 import * as userRoutes from './routes/user';
 import { setupSocket } from './socket';
 
@@ -33,6 +34,7 @@ app.use(express.json());
 app.use('/api/v1/auth', authRoutes.router);
 app.use('/api/v1/agents', agentRountes.router);
 app.use('/api/v1/user', userRoutes.router);
+app.use('/api/v1/call', callRoutes.router);
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
