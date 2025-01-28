@@ -20,7 +20,7 @@ const io = new Server(server);
 setupSocket(io);
 
 // Middleware
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 // Routes
