@@ -154,11 +154,10 @@ const newCallSocketConnection = async (socket: any) => {
             socket.emit('ai_disconnected');
         });
 
-        // Handle incoming events from client
-        socket.on('audio_data', (audioChunk: ArrayBuffer) => {
-            console.log('Received audio chunk:', audioChunk.byteLength);
+        socket.on('audio_data', (audioChunk: Uint8Array) => {
+            console.log('Received audio chunk of length:', audioChunk.length);
             if (pythonWs.readyState === WebSocket.OPEN) {
-                // Forward audio chunk to Python server
+                // Send as binary data
                 pythonWs.send(audioChunk);
             }
         });
