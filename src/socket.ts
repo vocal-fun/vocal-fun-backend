@@ -29,7 +29,7 @@ export const sendUserSocketMessage = (address: string, event: string, data: any)
 }
 
 const newSocketConnection = async (socket: any) => {
-    let token = socket.handshake.query.token;
+    let token = socket.handshake.auth.token;
     let user = await decodeJwt(token);
 
     let isAuthenticated = user && user.address;
@@ -52,7 +52,7 @@ const newSocketConnection = async (socket: any) => {
 const newCallSocketConnection = async (socket: any) => {
     console.log('Client connected via /call namespace');
 
-    let token = socket.handshake.query.token;
+    let token = socket.handshake.auth.token;
     let user = await decodeJwt(token);
 
     if (!user) {
@@ -61,7 +61,7 @@ const newCallSocketConnection = async (socket: any) => {
         return;
     }
 
-    const sessionId = socket.handshake.query.sessionId as string;
+    const sessionId = socket.handshake.auth.sessionId as string;
     let session = await getValidatedSession(sessionId);
     if (!session) {
         console.log('Invalid session ID');
