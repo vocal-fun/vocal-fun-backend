@@ -154,13 +154,10 @@ const newCallSocketConnection = async (socket: any) => {
             socket.emit('ai_disconnected');
         });
 
-        socket.on('audio_data', (base64Audio: string) => {
-            console.log('Received base64 audio chunk, length:', base64Audio.length);
+        socket.on('audio_data', (audioBuffer: ArrayBuffer) => {
             if (pythonWs.readyState === WebSocket.OPEN) {
-                pythonWs.send(JSON.stringify({
-                    type: 'audio_data',
-                    data: base64Audio
-                }));
+                // Send the Int16 audio data directly
+                pythonWs.send(audioBuffer);
             }
         });
 
