@@ -62,73 +62,126 @@ const newSocketConnection = async (socket: any) => {
     }
 }
    
-
 const newCallSocketConnection = async (socket: any) => {
     try {
-
         console.log('Client connected via /call namespace');
 
-    let token = socket.handshake.auth.token;
+        let token = socket.handshake.auth.token;
 
-    if (!token) {
-        console.log('Authentication required');
-        socket.disconnect(true);
-        return;
-    }
-    
-    let user = await decodeJwt(token);
-
-    if (!user) {
-        console.log('Invalid token');
-        socket.disconnect(true);
-        return;
-    }
-
-    const sessionId = socket.handshake.auth.sessionId as string;
-    let session = await getValidatedSession(sessionId);
-    if (!session) {
-        console.log('Invalid session ID');
-        socket.disconnect(true);
-        return;
-    }
-
-    socket.join(sessionId);
-
-    let agentId = session.agentId;
-    let userId = session.userId;
-
-    // ===== python AI socket =====
-    console.log('Connecting to AI WebSocket server...');
-    const pythonWs = new WebSocket('ws://15.206.168.54:8000/ws');
-
-    pythonWs.on('open', () => {
-        console.log('Connected to Python WebSocket server');
-        // send ready event to client when we are connected to AI server
-        socket.emit('call_ready')
-    });
-
-    pythonWs.on('message', (message: any) => {
-        console.log('Message from Python server:', message);
-        socket.emit('message', message);
-    });
-    // =============================
-
-
-    // ====== Call socket ======
-    socket.onAny((event: any, data: any) => {
-        console.log(`Received event from client: ${event}`, data);
-        if (pythonWs.readyState === WebSocket.OPEN) {
-            pythonWs.send(JSON.stringify({ type: event, data: data }));
+        if (!token) {
+            console.log('Authentication required');
+            socket.disconnect(true);
+            return;
         }
-    });
+        
+        let user = await decodeJwt(token);
 
-    socket.on('disconnect', () => {
-        console.log('Client disconnected from /call namespace');
-    });
-    // ================================
+        if (!user) {
+            console.log('Invalid token');
+            socket.disconnect(true);
+            return;
+        }
+
+        const sessionId = socket.handshake.auth.sessionId as string;
+        let session = await getValidatedSession(sessionId);
+        if (!session) {
+            console.log('Invalid session ID');
+            socket.disconnect(true);
+            return;
+        }
+
+        socket.join(sessionId);
+
+        let agentId = session.agentId;
+        let userId = session.userId;
+
+        // Connect to Python AI WebSocket server with sessionId
+        console.log('Connecting to AI WebSocket server...');
+        const pythonWs = new WebSocket(`ws://15.206.168.54:8000/ws/${sessionId}`);
+        
+        // Track speaking state
+        let isSpeaking = false;
+
+        pythonWs.on('open', () => {
+            console.log('Connected to Python WebSocket server');
+            socket.emit('call_ready');
+        });
+
+        pythonWs.on('message', (message: any) => {
+            try {
+                // Parse incoming message from Python server
+                const data = JSON.parse(message.toString());
+                
+                if (data.type === 'tts_stream') {
+                    // Forward TTS audio chunks to client
+                    socket.emit('tts_stream', data.data);
+                } if (data.type === 'tts_stream_end') {
+                    // notify client that TTS stream has ended
+                    socket.emit('tts_stream_end');
+                } else {
+                    // Forward other messages to client
+                    socket.emit('message', data);
+                }
+            } catch (error) {
+                console.error('Error processing message from Python server:', error);
+            }
+        });
+
+        pythonWs.on('error', (error: any) => {
+            console.error('WebSocket error:', error);
+            socket.emit('error', { message: 'AI server connection error' });
+        });
+
+        pythonWs.on('close', () => {
+            console.log('Connection to Python server closed');
+            socket.emit('ai_disconnected');
+        });
+
+        // Handle incoming events from client
+        socket.on('audio_data', (audioChunk: ArrayBuffer) => {
+            if (pythonWs.readyState === WebSocket.OPEN) {
+                // Forward audio chunk to Python server
+                pythonWs.send(audioChunk);
+            }
+        });
+
+        socket.on('speech_start', () => {
+            if (pythonWs.readyState === WebSocket.OPEN && !isSpeaking) {
+                isSpeaking = true;
+                pythonWs.send(JSON.stringify({ 
+                    type: 'speech_start'
+                }));
+            }
+        });
+
+        socket.on('speech_end', () => {
+            if (pythonWs.readyState === WebSocket.OPEN && isSpeaking) {
+                isSpeaking = false;
+                pythonWs.send(JSON.stringify({ 
+                    type: 'speech_end'
+                }));
+            }
+        });
+
+        // Handle other custom events
+        socket.on('custom_event', (data: any) => {
+            if (pythonWs.readyState === WebSocket.OPEN) {
+                pythonWs.send(JSON.stringify({
+                    type: 'custom_event',
+                    data: data
+                }));
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Client disconnected from /call namespace');
+            if (pythonWs.readyState === WebSocket.OPEN) {
+                pythonWs.close();
+            }
+        });
+
     } catch (e) {
-        console.log(e)
+        console.error('Error in call socket connection:', e);
         socket.disconnect();
     }
-
-}
+};
