@@ -168,8 +168,7 @@ const newCallSocketConnection = async (socket: any) => {
             }
         });
 
-        socket.on('transcript', (message: any) => {
-            let data = JSON.parse(message);
+        socket.on('transcript', (data: any) => {
             console.log('Received transcript', data);
             if (pythonWs.readyState === WebSocket.OPEN) {
                 console.log('Sending to AI server', data.text);
