@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { config } from '../config';
-import { insertAgentActualName, insertAgentVoicePreviews, insertAgents, insertAgentsData } from '../utils/insertAgents';
 
 export const connectDB = async (): Promise<void> => {
   try {

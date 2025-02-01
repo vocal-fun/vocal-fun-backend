@@ -161,23 +161,9 @@ export const insertAgentVoicePreviews =async () => {
 }
 
 export const insertAgentActualName = async () => {
-    let agent_mapping:any = {
-        "6798a29b0284724b65b1cc6e": "Vitalik",
-        "6798a29b0284724b65b1cc6f": "CZ",
-        "6798a29b0284724b65b1cc70": "Jeethotline",
-        "6798a29b0284724b65b1cc6d": "Donald Trump",
-        "6798a29b0284724b65b1cc73": "Do Kwon",
-        "6798a29b0284724b65b1cc74": "Monkey D. Luffy",
-        "6798a29b0284724b65b1cc75": "Justin Sun",
-        "6798a29b0284724b65b1cc77": "Sam Bankman-Fried",
-        "6798a29b0284724b65b1cc76": "Elon Musk",
-        "6798a29b0284724b65b1cc78": "Brian Armstrong",
-        "6798a29b0284724b65b1cc71": "Mao Zedong",
-        "6798a29b0284724b65b1cc72": "Vladimir Putin"
-    }
     let agents: any = await Agent.find();
     agents.forEach(async (agent: any) => {
-        agent.actualName = agent_mapping[agent._id.toString()];
+        agent.actualName = agent.name;
         await agent.save();
         console.log(`Inserted: ${agent.name} ${agent.actualName}`);
     });

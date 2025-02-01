@@ -38,7 +38,7 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
             const response = await axios.get('http://15.206.168.54:8003/tts', {
                 params: {
                     text: preview.text,
-                    personality: 'Trump'
+                    personality: agent?.name
                 },
                 responseType: 'json'
             });
