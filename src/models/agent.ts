@@ -66,4 +66,4 @@ const agentVoicePreviewSchema = new Schema<AgentVoicePreviewDocument>({
   }
 });
 
-export const AgentVoicePreview = mongoose.model<AgentVoicePreviewDocument>('ai_agents_voice_preview', agentVoicePreviewSchema);
+export const AgentVoicePreview = mongoose.model<AgentVoicePreviewDocument>('ai_agents_voice_previews', agentVoicePreviewSchema);

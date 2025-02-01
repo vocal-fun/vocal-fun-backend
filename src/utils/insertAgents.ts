@@ -1,4 +1,5 @@
 import { Agent, AgentVoicePreview } from "../models/agent";
+const agents = require('./agents.json');
 
 export const insertAgents = async () => {
     let agents = [
@@ -179,5 +180,27 @@ export const insertAgentActualName = async () => {
         agent.actualName = agent_mapping[agent._id.toString()];
         await agent.save();
         console.log(`Inserted: ${agent.name} ${agent.actualName}`);
+    });
+}
+
+export const insertAgentsData = async () => {
+    
+    agents.forEach(async (agent: any) => {
+        const newAgent = new Agent({
+            name: agent.agentName,
+            image: agent.ImageURI,
+            rate: agent.price, 
+            twitter: ''
+        });
+        await newAgent.save();
+
+        const newAgentPreview = new AgentVoicePreview({
+            agentId: newAgent._id,
+            text: agent.previewVoiceline
+        });
+
+        await newAgentPreview.save();
+
+        console.log(`Inserted: ${agent.displayName}`);
     });
 }
