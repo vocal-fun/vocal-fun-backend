@@ -35,7 +35,7 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
         } catch (error) {
             console.log('Generating new voice preview');
             
-            const response = await axios.get('http://15.206.168.54:8003/tts', {
+            const response = await axios.get('http://15.206.168.54:8003/tts/cartesia', {
                 params: {
                     text: preview.text,
                     personality: agent?.name
