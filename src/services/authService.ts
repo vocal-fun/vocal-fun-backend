@@ -33,7 +33,7 @@ export class AuthService {
     let user = await User.findOne({ address: lowercaseAddress });
     
     if (!user) {
-      user = await User.create({ address: lowercaseAddress });
+      user = await User.create({ address: lowercaseAddress, balance: 10 });
     }
     
     return user;
