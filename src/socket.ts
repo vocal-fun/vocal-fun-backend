@@ -3,6 +3,9 @@ import WebSocket from 'ws';  // WebSocket client library for connecting to Pytho
 import { getValidatedSession } from './services/callService';
 import { decodeJwt } from './middleware/auth';
 import { Agent } from './models/agent';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 let userIo: any;
 let callIo: any
@@ -107,7 +110,7 @@ const newCallSocketConnection = async (socket: any) => {
         console.log('new call socket connection', sessionId, agentId, userId, agent!.actualName);
         // Connect to Python AI WebSocket server with sessionId
         console.log('Connecting to AI WebSocket server...');
-        const pythonWs = new WebSocket(`ws://15.206.168.54:8000/ws/${sessionId}`);
+        const pythonWs = new WebSocket(`ws://${process.env.AI_NODE_URL}/ws/${sessionId}`);
         
         // Track speaking state
         let isSpeaking = false;

@@ -9,7 +9,7 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRATION || '24h'
   },
   mongodb: {
-    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/web3auth'
+    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/vocal'
   },
   redis: {
     uri: process.env.REDIS_URI || 'redis://localhost:6379'
