@@ -77,7 +77,7 @@ Content-Type: application/json
 ### Call Management
 
 #### Start Call
-```http
+```
 POST /api/v1/call/start
 Authorization: Token YOUR_JWT_TOKEN
 Query Parameters:
