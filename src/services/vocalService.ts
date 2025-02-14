@@ -3,6 +3,9 @@ import { ethers, WebSocketProvider, BigNumberish, formatUnits, Contract } from '
 import { getUserProfile } from './userService';
 import { User } from '../models/user';
 import { sendUserSocketMessage } from '../socket';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 interface PaymentMethod {
     name: string;
@@ -26,7 +29,7 @@ const CONSTANTS = {
     CREDIT_PURCHASE_RATE: 1, // 1 token for 1 min
     NETWORK: 'base',
     TOKEN_DECIMALS: 6,
-    ALCHEMY_WS_URL: 'wss://base-mainnet.g.alchemy.com/v2/_tn9X7pFnXwYXYi8Q33gQjRg_B3Dey_4',
+    ALCHEMY_WS_URL: process.env.RPC_URL || '',
     // Transfer event signature: keccak256("Transfer(address,address,uint256)")
     TRANSFER_EVENT_SIGNATURE: '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 } as const;
