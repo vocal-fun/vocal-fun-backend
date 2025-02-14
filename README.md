@@ -147,6 +147,7 @@ interface Agent {
    ```
     PORT: Server port (default: 4040)
     MONGODB_URI: MongoDB connection string
+    REDIS_URI: Redis uri
     JWT_SECRET: Secret for JWT token generation
     RPC_URL: Base RPC URL
     AI_NODE_URL: URL for vocal AI node (https://github.com/vocal-fun/vocal-fun-ai-node)
