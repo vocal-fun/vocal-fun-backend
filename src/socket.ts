@@ -132,7 +132,8 @@ const newCallSocketConnection = async (socket: any) => {
                 llmModel: agentConfig!.llmModel,
                 sttModel: agentConfig!.sttModel,
                 ttsModel: agentConfig!.ttsModel,
-                rate: agentConfig!.rate
+                rate: agentConfig!.rate,
+                language: agentConfig!.language
             }));
         });
 

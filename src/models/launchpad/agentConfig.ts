@@ -20,7 +20,7 @@ const AgentConfigSchema = new Schema({
   systemPrompt: { type: String, required: true },
   voiceSampleUrl: { type: String, required: true },
   cartesiaVoiceId: { type: String, required: false },
-  language: { type: String, required: false },
+  language: { type: String, required: false, default: 'en' },
   elevenLabsVoiceId: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
