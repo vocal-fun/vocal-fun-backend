@@ -107,7 +107,8 @@ export class LaunchpadAgentService {
   }
 
   async getAgentByTokenAddress(tokenAddress: string) {
-    return LaunchpadAgent.findOne({ tokenAddress: tokenAddress });
+    return LaunchpadAgent.findOne({ tokenAddress: tokenAddress })
+      .populate('createdBy', 'address');
   }
 
   async getAgentsByMarketCap(page = 1, limit = 20) {
