@@ -122,6 +122,13 @@ router.get('/agent/:id', async (req, res) => {
   }
 });
 
+// get agent by token address
+router.get('/agent/token/:tokenAddress', async (req, res) => {
+  const { tokenAddress } = req.params;
+  const agent = await launchpadService.getAgentByTokenAddress(tokenAddress);
+  res.json(agent);
+});
+
 // Get comments for an agent
 router.get('/comments/:agentId', async (req, res) => {
   try {

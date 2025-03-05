@@ -2,16 +2,17 @@ import { Agent, AgentVoicePreview } from "../models/agent"
 import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
+import LaunchpadAgent from "../models/launchpad/agent";
 
 const VOICE_PREVIEWS_DIR = path.join(__dirname, '..', 'voice_previews');
 
 export const getAllAgents = async () => {
-    let agents = await Agent.find()
+    let agents = await LaunchpadAgent.find({featured: true})
     return agents
 }
 
 export const getAgent = async (agentId: string) => {
-    let agent = await Agent.findOne({ _id: agentId });
+    let agent = await LaunchpadAgent.findOne({ _id: agentId });
     return agent;
 }
 
@@ -19,7 +20,7 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
     try {
         await fs.mkdir(VOICE_PREVIEWS_DIR, { recursive: true });
 
-        let agent = await Agent.findOne({ _id: agentId });
+        let agent = await LaunchpadAgent.findOne({ _id: agentId });
         let voicePreviews = await AgentVoicePreview.find({ agentId: agentId });
         let random = Math.floor(Math.random() * voicePreviews.length);
         let preview = voicePreviews[random];
