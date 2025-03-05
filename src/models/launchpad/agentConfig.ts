@@ -11,6 +11,7 @@ export interface IAgentConfig extends Document {
   llmModel: string;
   sttModel: string;
   ttsModel: string;
+  rate: number;
 }
 
 // add timestamp to the schema
@@ -25,7 +26,8 @@ const AgentConfigSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
   llmModel: { type: String, required: false },
   sttModel: { type: String, required: false },
-  ttsModel: { type: String, required: false }
+  ttsModel: { type: String, required: false },
+  rate: { type: Number, required: false, default: 1 }
 }, {
   timestamps: true
 });
