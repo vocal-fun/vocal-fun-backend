@@ -4,6 +4,8 @@ import { getValidatedSession } from './services/callService';
 import { decodeJwt } from './middleware/auth';
 import { Agent } from './models/agent';
 import dotenv from 'dotenv';
+import LaunchpadAgent from './models/launchpad/agent';
+import AgentConfig from './models/launchpad/agentConfig';
 
 dotenv.config();
 
@@ -97,7 +99,8 @@ const newCallSocketConnection = async (socket: any) => {
         let agentId = session.agentId;
         let userId = session.userId;
 
-        let agent = await Agent.findById(agentId);
+        let agent = await LaunchpadAgent.findById(agentId);
+        let agentConfig = await AgentConfig.findOne({ agentId: agentId });
 
         if (!agent) {
             console.log('Agent not found');
@@ -119,10 +122,18 @@ const newCallSocketConnection = async (socket: any) => {
             console.log('Connected to Python WebSocket server');
             pythonWs.send(JSON.stringify({
                 agentId: agentId,
-                agentName: agent!.actualName,
-                userId: userId
+                agentName: agent!.name,
+                userId: userId,
+                configId: agentConfig!._id.toString(),
+                systemPrompt: agentConfig!.systemPrompt,
+                voiceSampleUrl: agentConfig!.voiceSampleUrl,
+                cartesiaVoiceId: agentConfig!.cartesiaVoiceId,
+                elevenLabsVoiceId: agentConfig!.elevenLabsVoiceId,
+                llmModel: agentConfig!.llmModel,
+                sttModel: agentConfig!.sttModel,
+                ttsModel: agentConfig!.ttsModel,
+                rate: agentConfig!.rate
             }));
-            socket.emit('call_ready');
         });
 
         pythonWs.on('message', (message: any) => {
@@ -130,6 +141,12 @@ const newCallSocketConnection = async (socket: any) => {
                 // Parse incoming message from Python server
                 const data = JSON.parse(message.toString());
                 
+                // ai node ready
+                if (data.type == "call_ready") {
+                    // notify client that call is ready
+                    socket.emit('call_ready');
+                }
+
                 if (data.type === 'tts_stream') {
                     console.log('Received TTS stream:', data.data.length);
                     // Forward TTS audio chunks to client
