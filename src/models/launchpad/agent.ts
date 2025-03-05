@@ -19,7 +19,7 @@ export interface ILaunchpadAgent extends Document {
 
 const LaunchpadAgentSchema = new Schema({
   name: { type: String, required: true },
-  symbol: { type: String, required: true, unique: true },
+  symbol: { type: String, required: true, unique: false },
   description: { type: String, required: true },
   imageUrl: { type: String, required: true },
   tokenAddress: { type: String, required: true, unique: true },
