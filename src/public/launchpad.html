@@ -400,6 +400,7 @@
                                     <div class="token-metric-value">$${formatMarketCap(agent.marketCap)}</div>
                                 </div>
                             </div>
+                            <button class="btn" onclick="callAgent(event, '${agent.tokenAddress}')" style="margin-top: 12px;">Call Agent</button>
                         </div>
                     </div>
                 `).join('');
@@ -640,6 +641,15 @@
 
         function formatMarketCap(marketCap) {
             return parseFloat(marketCap || 0).toFixed(2);
+        }
+
+        function callAgent(event, tokenAddress) {
+            event.stopPropagation(); // Prevent the token details modal from opening
+            if (tokenAddress) {
+                window.open(`https://app.vocal.fun/vocal-test?tokenAddress=${tokenAddress}`, '_blank');
+            } else {
+                alert('Token address not available');
+            }
         }
     </script>
 </body>
