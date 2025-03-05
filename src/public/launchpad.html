@@ -25,57 +25,71 @@
         }
         .token-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+            gap: 20px;
+            padding: 10px;
         }
         .token-card {
             cursor: pointer;
             transition: all 0.3s ease;
-            display: grid;
-            grid-template-columns: 100px 1fr auto;
-            gap: 24px;
+            display: flex;
             align-items: center;
             padding: 20px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #eee;
         }
         .token-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .token-card img {
             width: 80px;
             height: 80px;
-            border-radius: 8px;
+            border-radius: 12px;
             object-fit: cover;
+            margin-right: 24px;
+            flex-shrink: 0;
         }
         .token-info {
-            overflow: hidden;
-            max-width: 600px;
+            flex: 1;
+            min-width: 0; /* Ensures proper text truncation */
         }
         .token-info h3 {
             margin: 0 0 8px 0;
+            font-size: 18px;
+            color: #333;
         }
         .token-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 100%;
-            -webkit-line-clamp: 1;
         }
         .token-metrics {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-top: 0;
-            justify-content: flex-end;
+            margin-top: 12px;
         }
         .token-metric {
-            min-width: 120px;
-            text-align: center;
+            min-width: 0;
+            text-align: left;
         }
         .token-metric-label {
             color: #666;
-            font-size: 0.8em;
+            font-size: 12px;
+            margin-bottom: 4px;
         }
         .token-metric-value {
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .modal {
             display: none;
@@ -369,6 +383,10 @@
                             <h3>${agent.name}</h3>
                             <div class="token-description">${agent.description || 'No description available'}</div>
                             <div class="token-metrics">
+                                <div class="token-metric">
+                                    <div class="token-metric-label">Token Address</div>
+                                    <div class="token-metric-value">${agent.tokenAddress ? `${agent.tokenAddress.substring(0, 6)}...${agent.tokenAddress.slice(-4)}` : 'N/A'}</div>
+                                </div>
                                 <div class="token-metric">
                                     <div class="token-metric-label">Created by</div>
                                     <div class="token-metric-value">${agent.createdBy.address.substring(0, 6)}...${agent.createdBy.address.slice(-4)}</div>
