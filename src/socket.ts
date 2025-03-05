@@ -100,7 +100,7 @@ const newCallSocketConnection = async (socket: any) => {
         let userId = session.userId;
 
         let agent = await LaunchpadAgent.findById(agentId);
-        let agentConfig = await AgentConfig.findOne({ agentId: agentId });
+        let agentConfig = await AgentConfig.findOne({ agent: agentId });
 
         if (!agent) {
             console.log('Agent not found');
