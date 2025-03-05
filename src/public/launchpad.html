@@ -327,6 +327,14 @@
                         <label for="websiteInput">Website URL:</label>
                         <input type="url" id="websiteInput" placeholder="https://...">
                     </div>
+
+                    <div class="form-group form-full-width">
+                        <div class="fee-info" style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                            <h4 style="margin-top: 0;">Creation Fees</h4>
+                            <p id="createFees">Loading fees...</p>
+                            <p style="font-size: 0.9em; color: #666;">This fee will be charged when creating your agent token.</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn-primary">Create Agent Token</button>
@@ -542,9 +550,32 @@
             }
         }
 
-        // Utility functions
+        // Fetch config information
+        async function fetchConfig() {
+            try {
+                const response = await fetch(`${BASE_URL}/v1/launchpad/config`);
+                const data = await response.json();
+                // Store config globally
+                window.launchpadConfig = data;
+                // Update fees display if the create modal is open
+                updateFeesDisplay();
+            } catch (error) {
+                console.error('Error fetching config:', error);
+            }
+        }
+
+        // Update fees display
+        function updateFeesDisplay() {
+            const feesElement = document.getElementById('createFees');
+            if (feesElement && window.launchpadConfig) {
+                feesElement.textContent = `${window.launchpadConfig.createAgentFees} ETH`;
+            }
+        }
+
+        // Update the showCreateTokenModal function
         function showCreateTokenModal() {
             document.getElementById('createTokenModal').style.display = 'block';
+            updateFeesDisplay();
         }
 
         function closeModal(modalId) {
@@ -566,9 +597,10 @@
             event.currentTarget.classList.add('active');
         }
 
-        // Initialize
+        // Update the initialize section
         document.addEventListener('DOMContentLoaded', () => {
             fetchTokens();
+            fetchConfig(); // Add this line to fetch config on page load
             document.getElementById('createTokenForm').addEventListener('submit', createToken);
         });
 
