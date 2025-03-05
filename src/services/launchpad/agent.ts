@@ -151,8 +151,6 @@ export class LaunchpadAgentService {
       Comment.countDocuments({ agent: agentId })
     ]);
 
-    console.log(comments);
-
     return { comments, total };
   }
 
