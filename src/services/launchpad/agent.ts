@@ -102,8 +102,8 @@ export class LaunchpadAgentService {
       .limit(limit)
       .populate('createdBy', 'address');
     
-
-    return agents;
+    // filter out inactive agents
+    return agents.filter((agent) => agent.active);
   }
 
   async getAgentByTokenAddress(tokenAddress: string) {

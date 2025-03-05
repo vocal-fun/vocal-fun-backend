@@ -8,7 +8,7 @@ import agentConfig from "../models/launchpad/agentConfig";
 const VOICE_PREVIEWS_DIR = path.join(__dirname, '..', 'voice_previews');
 
 export const getAllAgents = async () => {
-    let agents = await LaunchpadAgent.find({featured: true})
+    let agents = await LaunchpadAgent.find({featured: true, active: true})
     let agentConfigs = await agentConfig.find({agent: {$in: agents.map((agent) => agent._id)}})
     return agents.map((agent) => {
         let config = agentConfigs.find((config) => config.agent.toString() === agent._id.toString())

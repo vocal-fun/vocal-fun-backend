@@ -15,6 +15,7 @@ export interface ILaunchpadAgent extends Document {
   totalSupply: number;
   featured: boolean;
   actualName: string;
+  active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +34,8 @@ const LaunchpadAgentSchema = new Schema({
   currentPrice: { type: String, default: '0' },
   totalSupply: { type: String, default: '1000000000000000000000000' }, // 1 billion tokens
   featured: { type: Boolean, default: false },
-  actualName: { type: String, required: false }
+  actualName: { type: String, required: false },
+  active: { type: Boolean, default: true }
 }, {
   timestamps: true
 });
