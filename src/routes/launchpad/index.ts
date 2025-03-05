@@ -16,10 +16,17 @@ const upload = multer({ storage: multer.memoryStorage() });
 const launchpadService = new LaunchpadAgentService();
 
 router.get('/config', (req, res) => {
-  res.json({
-    createAgentFees: '0.02',
-    chainId: 8453,
-  });
+  try {
+    res.json({
+      createAgentFees: '0.02',
+      chainId: 8453,
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch config',
+      message: (error as Error).message 
+    });
+  }
 });
 
 router.get('/agents', async (req, res) => {
@@ -124,9 +131,16 @@ router.get('/agent/:id', async (req, res) => {
 
 // get agent by token address
 router.get('/agent/token/:tokenAddress', async (req, res) => {
-  const { tokenAddress } = req.params;
-  const agent = await launchpadService.getAgentByTokenAddress(tokenAddress);
-  res.json(agent);
+  try {
+    const { tokenAddress } = req.params;
+    const agent = await launchpadService.getAgentByTokenAddress(tokenAddress);
+    res.json(agent);
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch agent by token address',
+      message: (error as Error).message 
+    });
+  }
 });
 
 // Get comments for an agent
@@ -250,23 +264,30 @@ router.post('/create',
     { name: 'voiceSample', maxCount: 1 }
   ]),
   async (req: Request, res) => {
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
-    const agent = await launchpadService.createAgent({
-      name: req.body.name,
-      symbol: req.body.symbol,
-      description: req.body.description,
-      systemPrompt: req.body.systemPrompt,
-      twitter: req.body.twitter,
-      website: req.body.website,
-      telegram: req.body.telegram,
-      tokenAddress: req.body.tokenAddress,
-      userId: req.user!.id,
-      image: files.image[0],
-      voiceSample: files.voiceSample[0],
+    try {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      const agent = await launchpadService.createAgent({
+        name: req.body.name,
+        symbol: req.body.symbol,
+        description: req.body.description,
+        systemPrompt: req.body.systemPrompt,
+        twitter: req.body.twitter,
+        website: req.body.website,
+        telegram: req.body.telegram,
+        tokenAddress: req.body.tokenAddress,
+        userId: req.user!.id,
+        image: files.image[0],
+        voiceSample: files.voiceSample[0],
+      });
+
+      res.json(agent);
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to create agent',
+      message: (error as Error).message 
     });
-    
-    res.json(agent);
+  }
 });
 
 // Add a comment to an agent
