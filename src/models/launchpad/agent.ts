@@ -13,6 +13,8 @@ export interface ILaunchpadAgent extends Document {
   marketCap: number;
   currentPrice: number;
   totalSupply: number;
+  featured: boolean;
+  actualName: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,7 +31,9 @@ const LaunchpadAgentSchema = new Schema({
   telegram: { type: String },
   marketCap: { type: String, default: '5000' },
   currentPrice: { type: String, default: '0' },
-  totalSupply: { type: String, default: '1000000000000000000000000' } // 1 billion tokens
+  totalSupply: { type: String, default: '1000000000000000000000000' }, // 1 billion tokens
+  featured: { type: Boolean, default: false },
+  actualName: { type: String, required: false }
 }, {
   timestamps: true
 });

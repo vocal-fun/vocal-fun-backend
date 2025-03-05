@@ -359,7 +359,7 @@
         // Fetch and display tokens
         async function fetchTokens() {
             try {
-                const response = await fetch(`${BASE_URL}/v1/launchpad/agents`);
+                const response = await fetch(`${BASE_URL}/v1/launchpad/agents?limit=50`);
                 const data = await response.json();
                 const tokenList = document.getElementById('tokenList');
                 tokenList.innerHTML = data.agents.map(agent => `

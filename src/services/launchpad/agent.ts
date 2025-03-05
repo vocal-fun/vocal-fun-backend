@@ -7,6 +7,7 @@ import Trade from '../../models/launchpad/trade';
 import Holder from '../../models/launchpad/holder';
 import { User } from '../../models/user';
 import { Types } from 'mongoose';
+import { Agent } from '../../models/agent';
 
 export type SortOption = 'newest' | 'marketCap';
 
@@ -80,7 +81,10 @@ export class LaunchpadAgentService {
     await AgentConfig.create({
       agentId: agent._id,
       systemPrompt: data.systemPrompt,
-      voiceSampleUrl
+      voiceSampleUrl,
+      llmModel: 'llama3.2',
+      sttModel: 'whisper',
+      ttsModel: 'xtts_v2'
     });
 
     return agent;
@@ -262,6 +266,12 @@ export class LaunchpadAgentService {
     return { agents, total };
   }
 
+
+
+  ///////////////////////
+  // TEST DATA
+  ///////////////////////
+
   async insertTestData(agentId: string, numTrades = 10, numHolders = 5) {
     if (!Types.ObjectId.isValid(agentId)) {
       throw new Error('Invalid agent ID');
@@ -323,4 +333,29 @@ export class LaunchpadAgentService {
       holders: holders.length
     };
   }
+
+  async insertExistingAgents() {
+    let agents = await Agent.find();
+    // create a launchpad agent for each agent with the same id
+    for (let agent of agents) {
+      await LaunchpadAgent.create({
+        _id: agent._id,
+        name: agent.name,
+        actualName: agent.actualName,
+        symbol: agent.name.replace(/ /g, '').toLowerCase()  ,
+        description: agent.actualName,
+        imageUrl: agent.image,
+        createdBy: '67988933ad4a03e1d12fa187',
+        website: '',
+        twitter: '',
+        telegram: '',
+        marketCap: '5000',
+        currentPrice: '0',
+        totalSupply: '1000000000000000000000000',
+        featured: true,
+        tokenAddress: '0x' + Math.random().toString(16).slice(2, 42)
+      });
+    }
+  }
+
 } 
