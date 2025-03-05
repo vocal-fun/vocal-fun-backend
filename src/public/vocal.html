@@ -334,7 +334,7 @@
                     document.getElementById('agentName').textContent = agent.name;
                     document.getElementById('agentSymbol').textContent = `$${agent.symbol.toUpperCase()}`;
                     document.getElementById('agentTokenAddress').textContent = agent.tokenAddress;
-                    document.getElementById('agentCreator').textContent = agent.createdBy;
+                    document.getElementById('agentCreator').textContent = agent.createdBy.address;
                     document.getElementById('agentMarketCap').textContent = 
                         `$${Number(agent.marketCap || 0).toLocaleString()}`;
                     document.getElementById('agentPrice').textContent = 
