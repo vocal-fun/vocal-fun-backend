@@ -8,6 +8,7 @@ export interface IAgent {
     createdAt: Date;
     twitter: string;
     rate: number;
+    language: string;
 }
 
 export interface AgentDocument extends Omit<IAgent, '_id'>, Document {}
@@ -33,6 +34,11 @@ const agentSchema = new Schema<AgentDocument>({
     twitter: {
         type: String,
         required: false
+    },
+    language: {
+        type: String,
+        required: true,
+        default: 'en'
     },
   createdAt: {
     type: Date,
