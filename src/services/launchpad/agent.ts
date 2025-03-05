@@ -62,6 +62,9 @@ export class LaunchpadAgentService {
     const imageUrl = await uploadFile(data.image, 'agent-images');
     const voiceSampleUrl = await uploadFile(data.voiceSample, 'voice-samples');
 
+    // random token address for now
+    const tokenAddress = '0x' + Math.random().toString(16).slice(2, 42);
+
     const agent = await LaunchpadAgent.create({
       name: data.name,
       symbol: data.symbol,
@@ -71,7 +74,7 @@ export class LaunchpadAgentService {
       website: data.website,
       twitter: data.twitter,
       telegram: data.telegram,
-      tokenAddress: data.tokenAddress || '0x0000000000000000000000000000000000000000',
+      tokenAddress: tokenAddress,
     });
 
     await AgentConfig.create({
