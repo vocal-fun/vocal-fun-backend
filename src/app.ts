@@ -11,6 +11,7 @@ import * as userRoutes from './routes/user';
 import * as vocalRoutes from './routes/vocal';
 import { setupSocket } from './socket';
 import { vocalCreditListener } from './services/vocalService';
+import * as launchpadRoutes from './routes/launchpad';
 
 const app = express();
 
@@ -33,7 +34,12 @@ try {
 }
 
 // Middleware
-// app.use(cors());
+app.use(cors({
+  origin: true, // or specify your frontend origin like 'http://localhost:3000'
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Routes
@@ -42,7 +48,7 @@ app.use('/api/v1/agents', agentRountes.router);
 app.use('/api/v1/user', userRoutes.router);
 app.use('/api/v1/call', callRoutes.router);
 app.use('/api/v1/vocal', vocalRoutes.router);
-
+app.use('/api/v1/launchpad', launchpadRoutes.router);
 vocalCreditListener();
 
 // Error handling

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launchpad Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .token-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 15px;
+        }
+        .token-card:hover {
+            transform: translateY(-5px);
+        }
+        .token-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .token-info {
+            overflow: hidden;
+        }
+        .token-info h3 {
+            margin: 0 0 8px 0;
+        }
+        .token-description {
+            color: #666;
+            margin: 8px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .token-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .token-metric {
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .token-metric-label {
+            color: #666;
+            font-size: 0.8em;
+        }
+        .token-metric-value {
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .tab-button.active {
+            background: #007bff;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="url"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Launchpad Dashboard</h1>
+            <button class="btn" onclick="showCreateTokenModal()">Create New Token</button>
+        </div>
+
+        <div class="card">
+            <h2>Listed Tokens</h2>
+            <div class="token-grid" id="tokenList"></div>
+        </div>
+    </div>
+
+    <!-- Token Details Modal -->
+    <div id="tokenModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('tokenModal')">&times;</span>
+            <h2 id="tokenName"></h2>
+            
+            <div class="tab-container">
+                <button class="tab-button active" onclick="openTab(event, 'details')">Details</button>
+                <button class="tab-button" onclick="openTab(event, 'holders')">Holders</button>
+                <button class="tab-button" onclick="openTab(event, 'trades')">Trades</button>
+                <button class="tab-button" onclick="openTab(event, 'comments')">Comments</button>
+            </div>
+
+            <div id="details" class="tab-content active">
+                <div id="tokenDetails"></div>
+            </div>
+
+            <div id="holders" class="tab-content">
+                <table id="holdersTable">
+                    <thead>
+                        <tr>
+                            <th>Wallet Address</th>
+                            <th>Balance</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div id="trades" class="tab-content">
+                <table id="tradesTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Buyer</th>
+                            <th>Seller</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Transaction</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div id="comments" class="tab-content">
+                <div id="commentsList"></div>
+                <textarea id="newComment" placeholder="Add a comment..."></textarea>
+                <button class="btn" onclick="addComment()">Post Comment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Token Modal -->
+    <div id="createTokenModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('createTokenModal')">&times;</span>
+            <h2>Create New Agent Token</h2>
+            <form id="createTokenForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="tokenNameInput">Name:</label>
+                        <input type="text" id="tokenNameInput" required placeholder="Agent name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tokenSymbolInput">Symbol:</label>
+                        <input type="text" id="tokenSymbolInput" required placeholder="Token symbol (e.g., BTC)">
+                    </div>
+                    
+                    <div class="form-group form-full-width">
+                        <label for="imageInput">Profile Image:</label>
+                        <input type="file" id="imageInput" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group form-full-width">
+                        <label for="voiceSampleInput">Voice Sample:</label>
+                        <input type="file" id="voiceSampleInput" accept="audio/*" required>
+                    </div>
+                    
+                    <div class="form-group form-full-width">
+                        <label for="personalityPromptInput">Personality Prompt:</label>
+                        <textarea id="personalityPromptInput" required 
+                            placeholder="Describe the agent's personality, behavior, and characteristics..."></textarea>
+                    </div>
+                    
+                    <div class="form-group form-full-width">
+                        <label for="tokenDescriptionInput">Description:</label>
+                        <textarea id="tokenDescriptionInput" required 
+                            placeholder="Detailed description of your agent token..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="twitterInput">Twitter URL:</label>
+                        <input type="url" id="twitterInput" placeholder="https://twitter.com/...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="websiteInput">Website URL:</label>
+                        <input type="url" id="websiteInput" placeholder="https://...">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary">Create Agent Token</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('userModal')">&times;</span>
+            <h2>User Details</h2>
+            <div id="userDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:4040/api';
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzk4ODkzM2FkNGEwM2UxZDEyZmExODciLCJhZGRyZXNzIjoiMHgxNmIxMDI1Y2QxYTgzMTQxYmY5M2U0N2RiYzMxNmYzNGYyN2YyZTc2IiwiaWF0IjoxNzQwMjEwNjc3LCJleHAiOjE3NDIyODQyNzd9.x1OQ-ko4us7RSA6xztJ8ykF8cyPiTJM8zJoivP2D7EM';
+
+        // Fetch and display tokens
+        async function fetchTokens() {
+            try {
+                const response = await fetch(`${BASE_URL}/v1/launchpad/agents`);
+                const data = await response.json();
+                const tokenList = document.getElementById('tokenList');
+                tokenList.innerHTML = data.agents.map(agent => `
+                    <div class="card token-card" onclick="showTokenDetails('${agent._id}')">
+                        <img src="${agent.imageUrl || 'default-agent-image.png'}" alt="${agent.name}">
+                        <div class="token-info">
+                            <h3>${agent.name}</h3>
+                            <div class="token-description">${agent.description || 'No description available'}</div>
+                            <div class="token-metrics">
+                                <div class="token-metric">
+                                    <div class="token-metric-label">Created by</div>
+                                    <div class="token-metric-value">${agent.createdBy.address.substring(0, 6)}...${agent.createdBy.address.slice(-4)}</div>
+                                </div>
+                                <div class="token-metric">
+                                    <div class="token-metric-label">Price</div>
+                                    <div class="token-metric-value">$${formatPrice(agent.currentPrice)}</div>
+                                </div>
+                                <div class="token-metric">
+                                    <div class="token-metric-label">Market Cap</div>
+                                    <div class="token-metric-value">$${formatMarketCap(agent.marketCap)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching agents:', error);
+            }
+        }
+
+        // Show token details
+        async function showTokenDetails(agentId) {
+            try {
+                const agent = await fetch(`${BASE_URL}/v1/launchpad/agent/${agentId}`).then(r => r.json());
+                document.getElementById('tokenName').textContent = agent.name;
+                document.getElementById('tokenDetails').innerHTML = `
+                    <p>Symbol: ${agent.symbol}</p>
+                    <p>Total Supply: ${agent.totalSupply}</p>
+                    <p>Description: ${agent.description}</p>
+                `;
+                await fetchHolders(agentId);
+                await fetchTrades(agentId);
+                await fetchComments(agentId);
+                // Store current agent ID for comment functionality
+                window.currentAgentId = agentId;
+                document.getElementById('tokenModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error fetching agent details:', error);
+            }
+        }
+
+        // Fetch token holders
+        async function fetchHolders(agentId) {
+            try {
+                const response = await fetch(`${BASE_URL}/v1/launchpad/holders/${agentId}`);
+                const data = await response.json();
+                const tbody = document.querySelector('#holdersTable tbody');
+                tbody.innerHTML = data.holders.holders.map(holder => `
+                    <tr>
+                        <td><a href="#" onclick="showUserDetails('${holder.user.address}')">${holder.user.address}</a></td>
+                        <td>${holder.balance}</td>
+                        <td>${holder.percentage}%</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching holders:', error);
+            }
+        }
+
+        // Fetch trades
+        async function fetchTrades(agentId) {
+            try {
+                const response = await fetch(`${BASE_URL}/v1/launchpad/trades/${agentId}`);
+                const data = await response.json();
+                const tbody = document.querySelector('#tradesTable tbody');
+                tbody.innerHTML = data.trades.trades.map(trade => `
+                    <tr>
+                        <td>${new Date(trade.timestamp).toLocaleString()}</td>
+                        <td><a href="#" onclick="showUserDetails('${trade.buyer.address}')">${trade.buyer.address}</a></td>
+                        <td><a href="#" onclick="showUserDetails('${trade.seller.address}')">${trade.seller.address}</a></td>
+                        <td>${trade.amount}</td>
+                        <td>${trade.price}</td>
+                        <td><a href="https://etherscan.io/tx/${trade.txHash}" target="_blank">${trade.txHash.substring(0, 10)}...</a></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching trades:', error);
+            }
+        }
+
+        // Fetch comments
+        async function fetchComments(agentId) {
+            try {
+                const response = await fetch(`${BASE_URL}/v1/launchpad/comments/${agentId}`);
+                const data = await response.json();
+                document.getElementById('commentsList').innerHTML = data.comments.comments.map(comment => `
+                    <div class="card">
+                        <p>${comment.content}</p>
+                        <small>By: <a href="#" onclick="showUserDetails('${comment.createdBy.address}')">${comment.createdBy.address}</a> 
+                        on ${new Date(comment.createdAt).toLocaleString()}</small>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+            }
+        }
+
+        // Show user details
+        async function showUserDetails(userId) {
+            try {
+                const response = await fetch(`${BASE_URL}/v1/launchpad/user/${userId}`);
+                const data = await response.json();
+                document.getElementById('userDetails').innerHTML = `
+                    <p>Wallet Address: ${data.user.walletAddress}</p>
+                    <p>Joined: ${new Date(data.user.createdAt).toLocaleDateString()}</p>
+                    <p>Created Agents: ${data.agents.length}</p>
+                `;
+                document.getElementById('userModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            }
+        }
+
+        // Create token
+        async function createToken(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            
+            // Basic token info
+            formData.append('name', document.getElementById('tokenNameInput').value);
+            formData.append('symbol', document.getElementById('tokenSymbolInput').value);
+            formData.append('description', document.getElementById('tokenDescriptionInput').value);
+            
+            // Personality and social info
+            formData.append('systemPrompt', document.getElementById('personalityPromptInput').value);
+            formData.append('twitter', document.getElementById('twitterInput').value);
+            formData.append('website', document.getElementById('websiteInput').value);
+            
+            // Files
+            const imageFile = document.getElementById('imageInput').files[0];
+            const voiceFile = document.getElementById('voiceSampleInput').files[0];
+            
+            if (imageFile) formData.append('image', imageFile);
+            if (voiceFile) formData.append('voiceSample', voiceFile);
+
+            try {
+                
+                // Create headers object separately
+                const headers = new Headers();
+                headers.append('Authorization', `Bearer ${token}`);
+                
+                const response = await fetch(`${BASE_URL}/v1/launchpad/create`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: headers,
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create agent');
+                }
+                
+                closeModal('createTokenModal');
+                fetchTokens();
+                document.getElementById('createTokenForm').reset();
+            } catch (error) {
+                console.error('Error creating agent:', error);
+                alert('Failed to create agent. Please try again.');
+            }
+        }
+
+        // Add comment
+        async function addComment() {
+            const content = document.getElementById('newComment').value;
+            const agentId = window.currentAgentId; // Use stored agent ID
+            
+            try {
+                await fetch(`${BASE_URL}/v1/launchpad/comments/${agentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+                document.getElementById('newComment').value = '';
+                fetchComments(agentId);
+            } catch (error) {
+                console.error('Error adding comment:', error);
+            }
+        }
+
+        // Utility functions
+        function showCreateTokenModal() {
+            document.getElementById('createTokenModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openTab(event, tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let content of tabContents) {
+                content.classList.remove('active');
+            }
+
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let button of tabButtons) {
+                button.classList.remove('active');
+            }
+
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchTokens();
+            document.getElementById('createTokenForm').addEventListener('submit', createToken);
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        // Add utility functions for formatting
+        function formatPrice(price) {
+            return parseFloat(price || 0).toFixed(4);
+        }
+
+        function formatMarketCap(marketCap) {
+            return parseFloat(marketCap || 0).toFixed(2);
+        }
+    </script>
+</body>
+</html> 
