@@ -13,7 +13,7 @@ export const getAllAgents = async () => {
     return agents.map((agent) => {
         let config = agentConfigs.find((config) => config.agent.toString() === agent._id.toString())
         return {
-            ...agent,
+            ...agent.toObject(),
             image: agent.imageUrl,
             rate: config?.rate,
             language: config?.language
