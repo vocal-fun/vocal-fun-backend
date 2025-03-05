@@ -64,7 +64,7 @@ export class LaunchpadAgentService {
     const voiceSampleUrl = await uploadFile(data.voiceSample, 'voice-samples');
 
     // random token address for now
-    const tokenAddress = '0x' + Math.random().toString(16).slice(2, 42);
+    const tokenAddress = '0x' + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
 
     const agent = await LaunchpadAgent.create({
       name: data.name,
