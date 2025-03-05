@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IHolder extends Document {
-  userId: string;
-  agentId: string;
+  user: string;
+  agent: string;
   balance: number;
   percentage: number;
   lastUpdated: Date;
@@ -16,7 +16,7 @@ const HolderSchema = new Schema({
   lastUpdated: { type: Date, default: Date.now }
 });
 
-HolderSchema.index({ agentId: 1, balance: -1 });
-HolderSchema.index({ userId: 1, agentId: 1 }, { unique: true });
+HolderSchema.index({ agent: 1, balance: -1 });
+HolderSchema.index({ user: 1, agent: 1 }, { unique: true });
 
 export default mongoose.model<IHolder>('holders', HolderSchema); 

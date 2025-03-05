@@ -261,4 +261,66 @@ export class LaunchpadAgentService {
 
     return { agents, total };
   }
+
+  async insertTestData(agentId: string, numTrades = 10, numHolders = 5) {
+    if (!Types.ObjectId.isValid(agentId)) {
+      throw new Error('Invalid agent ID');
+    }
+
+    const agent = await LaunchpadAgent.findById(agentId);
+    if (!agent) {
+      throw new Error('Agent not found');
+    }
+
+   // pick random users from the database
+   const testUsers = await User.find().limit(5);
+
+    // Insert random trades
+    const trades = await Promise.all(
+      Array(numTrades).fill(0).map(async (_, i) => {
+        const buyerIndex = Math.floor(Math.random() * testUsers.length);
+        let sellerIndex;
+        do {
+          sellerIndex = Math.floor(Math.random() * testUsers.length);
+        } while (sellerIndex === buyerIndex);
+
+        return Trade.create({
+          agent: agentId,
+          amount: Math.floor(Math.random() * 1000) + 1,
+          price: parseFloat((Math.random() * 0.1).toFixed(6)),
+          buyer: testUsers[buyerIndex]._id,
+          seller: testUsers[sellerIndex]._id,
+          timestamp: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
+          txHash: '0x' + Math.random().toString(16).slice(2, 42)
+        });
+      })
+    );
+
+    // Insert random holders
+    const totalSupply = 1000000000; // 1B tokens
+    let remainingPercentage = 100;
+    
+    const holders = await Promise.all(
+      Array(numHolders).fill(0).map(async (_, i) => {
+        const isLast = i === numHolders - 1;
+        const percentage = isLast ? remainingPercentage : Math.min(remainingPercentage, Math.floor(Math.random() * 30) + 1);
+        remainingPercentage -= percentage;
+        
+        const balance = Math.floor((totalSupply * percentage) / 100);
+        
+        return Holder.create({
+          agent: agentId,
+          user: testUsers[i % testUsers.length]._id,
+          balance,
+          percentage
+        });
+      })
+    );
+
+    return {
+      message: 'Test data inserted successfully',
+      trades: trades.length,
+      holders: holders.length
+    };
+  }
 } 

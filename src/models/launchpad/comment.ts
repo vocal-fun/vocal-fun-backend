@@ -2,8 +2,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IComment extends Document {
   content: string;
-  userId: string;
-  agentId: string;
+  createdBy: string;
+  agent: string;
   createdAt: Date;
 }
 

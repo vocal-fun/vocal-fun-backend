@@ -1,13 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAgentConfig extends Document {
-  agentId: string;
+  agent: string;
   systemPrompt: string;
   voiceSampleUrl: string;
 }
 
 const AgentConfigSchema = new Schema({
-  agentId: { type: Schema.Types.ObjectId, ref: 'agents', required: true },
+  agent: { type: Schema.Types.ObjectId, ref: 'agents', required: true },
   systemPrompt: { type: String, required: true },
   voiceSampleUrl: { type: String, required: true }
 });
