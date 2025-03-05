@@ -79,7 +79,7 @@ export class LaunchpadAgentService {
     });
 
     await AgentConfig.create({
-      agentId: agent._id,
+      agent: agent._id,
       systemPrompt: data.systemPrompt,
       voiceSampleUrl,
       llmModel: 'llama3.2',
