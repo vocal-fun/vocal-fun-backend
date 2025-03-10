@@ -68,9 +68,11 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
         } catch (error) {
             console.log('Generating new voice preview');
             
+            let config = await getAINodeAgentConfig(agentId)
             const response = await axios.post(`${AI_NODE_URL}/tts`, {
                 text: preview.text,
-                config: await getAINodeAgentConfig(agentId)
+                config: config,
+                config_id: config.configId,
             });
             
             audioBuffer = Buffer.from(response.data.audio, 'base64');
