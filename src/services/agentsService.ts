@@ -44,13 +44,10 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
             let config = await getAINodeAgentConfig(agentId)
             let sessionId = randomUUID()
             const response = await axios.post(`${AI_NODE_URL}/chat`, {
-                body: {
-                    text: "Who the fuck are you? What the fuck do you do?",
-                    config: config,
-                    config_id: config.configId,
-                    session_id: sessionId
-                },
-                responseType: 'json'
+                text: "Who the fuck are you? What the fuck do you do?",
+                config: config,
+                config_id: config.configId,
+                session_id: sessionId
             });
             let text = response.data.response
             console.log('New preview created for agent', config.agentName, text);
@@ -72,11 +69,8 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
             console.log('Generating new voice preview');
             
             const response = await axios.post(`${AI_NODE_URL}/tts`, {
-                body: {
-                    text: preview.text,
-                    config: await getAINodeAgentConfig(agentId)
-                },
-                responseType: 'json'
+                text: preview.text,
+                config: await getAINodeAgentConfig(agentId)
             });
             
             audioBuffer = Buffer.from(response.data.audio, 'base64');
