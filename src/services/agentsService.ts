@@ -4,8 +4,11 @@ import path from 'path';
 import axios from 'axios';
 import LaunchpadAgent from "../models/launchpad/agent";
 import agentConfig from "../models/launchpad/agentConfig";
+import { randomUUID } from "crypto";
 
 const VOICE_PREVIEWS_DIR = path.join(__dirname, '..', 'voice_previews');
+
+const AI_NODE_URL = "http://15.206.168.54:8000"
 
 export const getAllAgents = async () => {
     let agents = await LaunchpadAgent.find({featured: true, active: true})
@@ -34,6 +37,28 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
         let voicePreviews = await AgentVoicePreview.find({ agentId: agentId });
         let random = Math.floor(Math.random() * voicePreviews.length);
         let preview = voicePreviews[random];
+
+        if (!preview) {
+            console.log('No preview found, creating new one');
+            // create new preview voiceline from chat endpoint
+            let config = await getAINodeAgentConfig(agentId)
+            let sessionId = randomUUID()
+            const response = await axios.post(`${AI_NODE_URL}/chat`, {
+                body: {
+                    text: "Who the fuck are you? What the fuck do you do?",
+                    config: config,
+                    configId: config.configId,
+                    sessionId: sessionId
+                },
+                responseType: 'json'
+            });
+            let text = response.data.response
+            console.log('New preview created for agent', config.agentName, text);
+            preview = await AgentVoicePreview.create({
+                agentId: agentId,
+                text: text,
+            })
+        }
         
         // Generate cache filename based on preview ID
         const audioFilePath = path.join(VOICE_PREVIEWS_DIR, `${preview._id}.wav`);
@@ -46,10 +71,10 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
         } catch (error) {
             console.log('Generating new voice preview');
             
-            const response = await axios.get('http://15.206.168.54:8000/tts', {
-                params: {
+            const response = await axios.post(`${AI_NODE_URL}/tts`, {
+                body: {
                     text: preview.text,
-                    personality: agent?.name
+                    config: await getAINodeAgentConfig(agentId)
                 },
                 responseType: 'json'
             });
@@ -70,3 +95,24 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
         throw error;
     }
 };
+
+// config for the AI node
+export const getAINodeAgentConfig = async (agentId: string, userId: string = "") => {
+   let agent = await LaunchpadAgent.findOne({ _id: agentId });
+   let config = await agentConfig.findOne({ agent: agentId });
+   return {
+        agentId: agentId,
+        agentName: agent!.name,
+        userId: userId,
+        configId: config!._id.toString(),
+        systemPrompt: config!.systemPrompt,
+        voiceSampleUrl: config!.voiceSampleUrl,
+        cartesiaVoiceId: config!.cartesiaVoiceId,
+        elevenLabsVoiceId: config!.elevenLabsVoiceId,
+        llmModel: config!.llmModel,
+        sttModel: config!.sttModel,
+        ttsModel: config!.ttsModel,
+        rate: config!.rate,
+        language: config!.language
+    }
+}
