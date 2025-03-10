@@ -47,8 +47,8 @@ export const getAgentPreviewVoiceline = async (agentId: string) => {
                 body: {
                     text: "Who the fuck are you? What the fuck do you do?",
                     config: config,
-                    configId: config.configId,
-                    sessionId: sessionId
+                    config_id: config.configId,
+                    session_id: sessionId
                 },
                 responseType: 'json'
             });
