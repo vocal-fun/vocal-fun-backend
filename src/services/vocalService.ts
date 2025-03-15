@@ -22,7 +22,7 @@ interface TransferEvent {
     transactionHash: string;
 }
 
-const CONSTANTS = {
+export const CONSTANTS = {
     USDC_ADDRESS: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     USDT_ADDRESS: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
     EVM_RECEIVER_ADDRESS: '0x16b1025cD1A83141bf93E47dBC316f34f27f2e76',

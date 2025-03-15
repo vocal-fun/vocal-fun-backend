@@ -9,6 +9,7 @@ export interface ICreditTransaction {
     txAmount: number;
     tokenAddress: string;
     network: string;
+    provider: string;
     createdAt: Date;
 }
 
@@ -40,6 +41,10 @@ const creditTransactionSchema = new Schema<CreditTransactionDocument>({
         required: false
     },
     network: {
+        type: String,
+        required: false
+    },
+    provider: {
         type: String,
         required: false
     },

@@ -75,7 +75,7 @@ export class AuthService {
 
   static async exchangeToken(thirdPartyToken: string, provider: string): Promise<{ user: IUser; token: string } | null> {
     if (provider == 'glip') {
-      const response = await fetch(config.glip.exchangeTokenUrl!, {
+      const response = await fetch(`${config.glip.glipProviderUrl!}/exchange-vocal-token`, {
         method: 'POST',
         body: JSON.stringify({ token: thirdPartyToken }),
         headers: {
@@ -85,7 +85,6 @@ export class AuthService {
       });
       const data: any = await response.json();
       const glipData = data.data; 
-      console.log(glipData);
       const user = await this.findOrCreateUser(glipData.address, 0);
       const token = this.generateToken(user);
 
