@@ -171,6 +171,11 @@ const newCallSocketConnection = async (socket: any) => {
                             message: 'You have run out of vocal credits. Call will be disconnected.'
                         });
                         
+                        socket.emit('call_ending', { 
+                            reason: 'insufficient_credits'
+                        });
+                        
+                        
                         // Notify AI server that call is ending due to insufficient credits
                         if (pythonWs.readyState === WebSocket.OPEN) {
                             pythonWs.send(JSON.stringify({ 
