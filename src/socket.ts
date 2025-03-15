@@ -6,6 +6,8 @@ import { Agent } from './models/agent';
 import dotenv from 'dotenv';
 import LaunchpadAgent from './models/launchpad/agent';
 import AgentConfig from './models/launchpad/agentConfig';
+import { getUserById } from './services/userService';
+import { deductUserVocalCredits } from './services/vocalService';
 
 dotenv.config();
 
@@ -108,9 +110,104 @@ const newCallSocketConnection = async (socket: any) => {
             return;
         }
 
+
+
         socket.join(sessionId);
 
         console.log('new call socket connection', sessionId, agentId, userId, agent!.actualName);
+        
+        const currentUser = await getUserById(userId);
+
+        let shouldDeductBalance = false;
+        if (currentUser?.provider == "glip") {
+            shouldDeductBalance = true;
+        }
+
+        // Initial balance check and notification
+        try {
+            if (currentUser) {
+                socket.emit('balance_update', { 
+                    balance: currentUser.balance,
+                    message: 'Call started. Credits will be deducted periodically.'
+                });
+                
+                // If user has insufficient credits, don't allow the call to start
+                if (currentUser.balance <= 0) {
+                    socket.emit('balance_update', { 
+                        balance: currentUser.balance,
+                        message: 'Insufficient vocal credits. Please recharge your account.'
+                    });
+                    socket.disconnect(true);
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking initial user balance:', error);
+        }
+        
+        let balanceInterval: NodeJS.Timeout;
+
+        if (shouldDeductBalance) {
+            // Set up balance tracking
+            // Use the agent's rate from agentConfig instead of a fixed rate
+            const CREDIT_DEDUCTION_RATE = agentConfig?.rate || 1; // Credits to deduct per minute
+            const DEDUCTION_INTERVAL = 10000; // Deduct every 10 seconds
+            
+            // Calculate how much to deduct per interval (prorated from the per-minute rate)
+            const intervalRate = (CREDIT_DEDUCTION_RATE / 60) * (DEDUCTION_INTERVAL / 1000);
+            
+            // Start periodic balance deduction
+            balanceInterval = setInterval(async () => {
+                try {
+                    // Deduct credits based on the prorated interval rate
+                    const updatedBalance = await deductUserVocalCredits(userId, intervalRate);
+                    
+                    // Check if user has run out of credits
+                    if (!updatedBalance || updatedBalance <= 0) {
+                        console.log('User ran out of credits, disconnecting');
+                        clearInterval(balanceInterval);
+                        socket.emit('balance_update', { 
+                            balance: updatedBalance,
+                            message: 'You have run out of vocal credits. Call will be disconnected.'
+                        });
+                        
+                        // Notify AI server that call is ending due to insufficient credits
+                        if (pythonWs.readyState === WebSocket.OPEN) {
+                            pythonWs.send(JSON.stringify({ 
+                                type: 'call_end',
+                                reason: 'insufficient_credits'
+                            }));
+                        }
+                        
+                        // Disconnect after a short delay to allow message to be received
+                        setTimeout(() => {
+                            socket.disconnect(true);
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // Send balance update to user
+                    sendUserSocketMessage(user.address, 'balance_update', { 
+                        balance: updatedBalance,
+                        deducted: intervalRate,
+                        rate: CREDIT_DEDUCTION_RATE
+                    });
+                    
+                    // Also send to the current socket
+                    socket.emit('balance_update', { 
+                        balance: updatedBalance,
+                        deducted: intervalRate,
+                        rate: CREDIT_DEDUCTION_RATE
+                    });
+                    
+                    console.log(`Deducted ${intervalRate.toFixed(2)} credits from user ${userId} (rate: ${CREDIT_DEDUCTION_RATE}/min). New balance: ${updatedBalance}`);
+                    
+                } catch (error) {
+                    console.error('Error updating user balance:', error);
+                }
+            }, DEDUCTION_INTERVAL);
+        }
+
         // Connect to Python AI WebSocket server with sessionId
         console.log('Connecting to AI WebSocket server...');
         const pythonWs = new WebSocket(`ws://${process.env.AI_NODE_URL}/ws/${sessionId}`);
@@ -225,6 +322,11 @@ const newCallSocketConnection = async (socket: any) => {
 
         socket.on('disconnect', () => {
             console.log('Client disconnected from /call namespace');
+            // Clear the balance deduction interval when user disconnects
+            if (balanceInterval) {
+                clearInterval(balanceInterval);
+            }
+            
             if (pythonWs.readyState === WebSocket.OPEN) {
                 pythonWs.close();
             }

@@ -195,16 +195,31 @@ export const mintVocalCredits = async (apiKey: string, address: string, amount: 
                 txAmount: '',
                 provider: provider
             });
-            await newCredit.save()
-    
-            await User.updateOne(
-                { _id: user._id },
-                { $inc: { balance: amount } }
-            );
+        await newCredit.save()
+
+        await User.updateOne(
+            { _id: user._id },
+            { $inc: { balance: amount } }
+        );
     
         return { user };
     } catch (error) {
         console.error('Error minting vocal credits', error);
+        throw error;
+    }
+}
+
+export const deductUserVocalCredits = async (userId: string, amount: number): Promise<any> => {
+    try {
+        await User.updateOne(
+            { _id: userId },
+            { $inc: { balance: -amount } }
+        );
+        
+        const updatedUser = await User.findById(userId, { balance: 1 });
+        return updatedUser?.balance || 0;
+    } catch (error) {
+        console.error('Error updating user vocal credits', error);
         throw error;
     }
 }
