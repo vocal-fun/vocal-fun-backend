@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { getUserProfile } from '../services/userService';
 import { validate } from '../middleware/validate';
-import { exchangeVocalCredits } from '@/services/callService';
+import { exchangeVocalCredits } from '../services/callService';
 import { z } from 'zod';
 
 export const router = Router();

@@ -3,8 +3,8 @@ import { CallSession } from "../models/call";
 import { getAgent } from "./agentsService";
 import { getUserById } from "./userService";
 import { config } from '../config';
-import { CreditTransaction } from "@/models/vocal";
-import { User } from "@/models/user";
+import { CreditTransaction } from "../models/vocal";
+import { User } from "../models/user";
 
 export const startCall = async (userId: string, agentId: string) => {
     console.log('starting call', userId, agentId);
