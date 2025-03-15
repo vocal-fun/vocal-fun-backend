@@ -246,7 +246,6 @@ const newCallSocketConnection = async (socket: any) => {
                 }
 
                 if (data.type === 'tts_stream') {
-                    console.log('Received TTS stream:', data.data.length);
                     // Forward TTS audio chunks to client
                     socket.emit('audio_stream', data.data);
                 } if (data.type === 'tts_stream_end') {
