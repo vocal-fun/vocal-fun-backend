@@ -1,4 +1,4 @@
-import { getAgentPreviewVoiceline, getAllAgents } from '../services/agentsService';
+import { getAgentPreviewVoiceline, getAgentsFromTags, getAllAgents } from '../services/agentsService';
 import { Router } from 'express';
 
 export const router = Router();
@@ -6,9 +6,12 @@ export const router = Router();
 router.get('/', async (req, res) => {
   try {
     let tag = req.query.tag as string;
-    let featuredQuery = req.query.featured;
-    let featured = featuredQuery ? featuredQuery === 'true' : true;
-    let result = await getAllAgents(tag, featured);
+    let result
+    if (tag) {
+      result = await getAgentsFromTags(tag);
+    } else {
+      result = await getAllAgents();
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

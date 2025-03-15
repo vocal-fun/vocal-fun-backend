@@ -5,19 +5,29 @@ import axios from 'axios';
 import LaunchpadAgent from "../models/launchpad/agent";
 import agentConfig from "../models/launchpad/agentConfig";
 import { randomUUID } from "crypto";
+import agent from "../models/launchpad/agent";
 
 const VOICE_PREVIEWS_DIR = path.join(__dirname, '..', 'voice_previews');
 
 const AI_NODE_URL = "http://15.206.168.54:8000"
 
-export const getAllAgents = async (tag: string = "", featured: boolean = true) => {
+export const getAllAgents = async () => {
+    let agents = await LaunchpadAgent.find({active: true, featured: true})
+    return fillAgentWithConfig(agents)
+}
+
+export const getAgentsFromTags = async (tag: string = "") => {
     let tagArray = tag ? tag.split(',') : [];
     let agents = [];
     if (tagArray.length > 0) {
-        agents = await LaunchpadAgent.find({featured: featured, active: true, tag: {$in: tagArray}})
+        agents = await LaunchpadAgent.find({active: true, tag: {$in: tagArray}})
     } else {
-        agents = await LaunchpadAgent.find({featured: featured, active: true})
+        agents = await LaunchpadAgent.find({active: true})
     }
+    return fillAgentWithConfig(agents)
+}
+
+const fillAgentWithConfig = async (agents: any[]) => {
     let agentConfigs = await agentConfig.find({agent: {$in: agents.map((agent) => agent._id)}})
     return agents.map((agent) => {
         let config = agentConfigs.find((config) => config.agent.toString() === agent._id.toString())
