@@ -5,6 +5,7 @@ import { User } from '../models/user';
 import { sendUserSocketMessage } from '../socket';
 import dotenv from 'dotenv';
 import { config } from '../config';
+import { AuthService } from './authService';
 
 dotenv.config();
 
@@ -183,10 +184,7 @@ export const mintVocalCredits = async (apiKey: string, address: string, amount: 
             throw new Error('Invalid provider');
         }
         
-        const user = await getUserById(address.toLowerCase());
-        if (!user) {
-            throw new Error('User not found');
-        }
+       const user = await AuthService.findOrCreateUser(address, 0, provider);
         const newCredit = new CreditTransaction({
                 userId: user._id.toString(),
                 userAddress: user.address,
