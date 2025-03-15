@@ -28,12 +28,12 @@ export class AuthService {
     return true;
   }
 
-  static async findOrCreateUser(address: string): Promise<IUser> {
+  static async findOrCreateUser(address: string, initialBalance: number = 10): Promise<IUser> {
     const lowercaseAddress = address.toLowerCase();
     let user = await User.findOne({ address: lowercaseAddress });
     
     if (!user) {
-      user = await User.create({ address: lowercaseAddress, balance: 10 });
+      user = await User.create({ address: lowercaseAddress, balance: initialBalance });
     }
     
     return user;
@@ -67,9 +67,31 @@ export class AuthService {
     }
 
     // Find or create user
-    const user = await this.findOrCreateUser(address);
+    const user = await this.findOrCreateUser(address, 10);
     const token = this.generateToken(user);
 
     return { user, token };
+  }
+
+  static async exchangeToken(thirdPartyToken: string, provider: string): Promise<{ user: IUser; token: string } | null> {
+    if (provider == 'glip') {
+      const response = await fetch(config.glip.exchangeTokenUrl!, {
+        method: 'POST',
+        body: JSON.stringify({ token: thirdPartyToken }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': config.glip.apiKey!,
+        },
+      });
+      const data: any = await response.json();
+      const glipData = data.data; 
+      console.log(glipData);
+      const user = await this.findOrCreateUser(glipData.address, 0);
+      const token = this.generateToken(user);
+
+      return { user, token };
+    }
+    throw new Error('Unsupported provider');
+   
   }
 }

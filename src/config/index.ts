@@ -13,5 +13,9 @@ export const config = {
   },
   redis: {
     uri: process.env.REDIS_URI || 'redis://localhost:6379'
+  },
+  glip: {
+    exchangeTokenUrl: process.env.GLIP_EXCHANGE_TOKEN_URL,
+    apiKey: process.env.GLIP_X_API_KEY,
   }
 } as const;

@@ -13,3 +13,10 @@ export const verifySchema = z.object({
     nonce: z.string(),
   }),
 });
+
+export const exchangeTokenSchema = z.object({
+  body: z.object({
+    token: z.string(),
+    provider: z.enum(['glip']),
+  }),
+});

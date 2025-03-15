@@ -261,6 +261,10 @@
                 }
             }
 
+            async interrupt() {
+                this.audioQueue = [];
+            }
+
             async resume() {
                 try {
                     if (this.audioContext?.state === 'suspended') {
@@ -407,7 +411,13 @@
                         audioPlayer.cleanup();
                     }
                 });
-
+                socket.on('message', (data) => {
+                    console.log('Message from server:', data);
+                   if (data.type == "new_conversation_turn") {
+                    addLog('New conversation turn');
+                    audioPlayer.interrupt();
+                   }
+                });
                 socket.on('audio_stream', handleTTSStream);
                 socket.on('audio_stream_end', () => {
                     addLog('Audio stream ended');
@@ -501,7 +511,6 @@
                     audioContextObj.close();
                     audioContextObj = null;
                 }
-
                 isRecording = false;
                 startSpeakingBtn.disabled = false;
                 stopSpeakingBtn.disabled = true;
