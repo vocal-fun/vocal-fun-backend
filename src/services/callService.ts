@@ -59,6 +59,7 @@ export const exchangeVocalCredits = async (thirdPartyToken: string, provider: st
                 throw new Error('Failed to exchange credits');
             }
             const receivedAmount = data.data.amount;
+            const txHash = data.data.txHash;
             const user = await getUserById(address);
             if (!user) {
               throw new Error('User not found');
@@ -67,7 +68,7 @@ export const exchangeVocalCredits = async (thirdPartyToken: string, provider: st
                   userId: user._id.toString(),
                   userAddress: user.address,
                   creditAmount: receivedAmount,
-                  txHash: '',
+                  txHash: txHash,
                   txAmount: receivedAmount,
                   provider: provider
               });
