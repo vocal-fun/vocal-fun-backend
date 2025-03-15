@@ -188,7 +188,7 @@ const newCallSocketConnection = async (socket: any) => {
                         // Disconnect after a short delay to allow message to be received
                         setTimeout(() => {
                             socket.disconnect(true);
-                        }, 2000);
+                        }, 10000);
                         return;
                     }
                     
