@@ -91,6 +91,9 @@ const newCallSocketConnection = async (socket: any) => {
         }
 
         const sessionId = socket.handshake.auth.sessionId as string;
+        const client = socket.handshake.auth.client as string;
+        const country = socket.handshake.auth.country as string;
+
         let session = await getValidatedSession(sessionId);
         if (!session) {
             console.log('Invalid session ID');
@@ -221,23 +224,33 @@ const newCallSocketConnection = async (socket: any) => {
         // Track speaking state
         let isSpeaking = false;
 
+        let config: any = {
+            agentId: agentId,
+            agentName: agent!.name,
+            userId: userId,
+            configId: agentConfig!._id.toString(),
+            systemPrompt: agentConfig!.systemPrompt,
+            voiceSampleUrl: agentConfig!.voiceSampleUrl,
+            cartesiaVoiceId: agentConfig!.cartesiaVoiceId,
+            elevenLabsVoiceId: agentConfig!.elevenLabsVoiceId,
+            llmModel: agentConfig!.llmModel,
+            sttModel: agentConfig!.sttModel,
+            ttsModel: agentConfig!.ttsModel,
+            rate: agentConfig!.rate,
+            language: agentConfig!.language
+        }
+
+        if (client && client == "glip-android") {
+            config.speechDetectorConfig = {
+                "energy_threshold": 0.05,
+                "min_speech_duration": 0.4,
+                "max_silence_duration": 0.5,
+                "max_recording_duration": 10.0
+            }
+        }
         pythonWs.on('open', () => {
             console.log('Connected to Python WebSocket server');
-            pythonWs.send(JSON.stringify({
-                agentId: agentId,
-                agentName: agent!.name,
-                userId: userId,
-                configId: agentConfig!._id.toString(),
-                systemPrompt: agentConfig!.systemPrompt,
-                voiceSampleUrl: agentConfig!.voiceSampleUrl,
-                cartesiaVoiceId: agentConfig!.cartesiaVoiceId,
-                elevenLabsVoiceId: agentConfig!.elevenLabsVoiceId,
-                llmModel: agentConfig!.llmModel,
-                sttModel: agentConfig!.sttModel,
-                ttsModel: agentConfig!.ttsModel,
-                rate: agentConfig!.rate,
-                language: agentConfig!.language
-            }));
+            pythonWs.send(JSON.stringify(config));
         });
 
         pythonWs.on('message', (message: any) => {
