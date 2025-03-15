@@ -14,9 +14,9 @@ export const getAllAgents = async (tag: string = "", featured: boolean = true) =
     let tagArray = tag ? tag.split(',') : [];
     let agents = [];
     if (tagArray.length > 0) {
-        agents = await LaunchpadAgent.find({featured: true, active: true, tag: {$in: tagArray}})
+        agents = await LaunchpadAgent.find({featured: featured, active: true, tag: {$in: tagArray}})
     } else {
-        agents = await LaunchpadAgent.find({featured: true, active: true})
+        agents = await LaunchpadAgent.find({featured: featured, active: true})
     }
     let agentConfigs = await agentConfig.find({agent: {$in: agents.map((agent) => agent._id)}})
     return agents.map((agent) => {
