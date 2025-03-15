@@ -17,7 +17,7 @@ router.get('/', async (req: any, res) => {
   if (!address) {
     return res.status(401).json({ message: 'Authentication failed or address not provided' });
   }
-  let user = await getUserProfile(address)
+  let user = await getUserProfile(address.toLowerCase());
   res.json({ user: user });
 });
 
