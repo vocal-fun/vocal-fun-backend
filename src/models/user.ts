@@ -4,6 +4,7 @@ export interface IUser {
     _id: Types.ObjectId;
     address: string;
     balance: number;
+    provider: string;
     createdAt: Date;
 }
 
@@ -19,6 +20,10 @@ const userSchema = new Schema<UserDocument>({
     type: Number,
     required: true,
     default: 0
+  },
+  provider: {
+    type: String,
+    required: false,
   },
   createdAt: {
     type: Date,

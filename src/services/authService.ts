@@ -28,12 +28,12 @@ export class AuthService {
     return true;
   }
 
-  static async findOrCreateUser(address: string, initialBalance: number = 10): Promise<IUser> {
+  static async findOrCreateUser(address: string, initialBalance: number = 10, provider: string = ""): Promise<IUser> {
     const lowercaseAddress = address.toLowerCase();
     let user = await User.findOne({ address: lowercaseAddress });
     
     if (!user) {
-      user = await User.create({ address: lowercaseAddress, balance: initialBalance });
+      user = await User.create({ address: lowercaseAddress, balance: initialBalance, provider: provider });
     }
     
     return user;
@@ -85,7 +85,7 @@ export class AuthService {
       });
       const data: any = await response.json();
       const glipData = data.data; 
-      const user = await this.findOrCreateUser(glipData.address, 0);
+      const user = await this.findOrCreateUser(glipData.address, 0, provider);
       const token = this.generateToken(user);
 
       return { user, token };
