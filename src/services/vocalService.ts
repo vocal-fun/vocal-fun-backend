@@ -213,8 +213,12 @@ export const deductUserVocalCredits = async (userId: string, amount: number): Pr
             { _id: userId },
             { $inc: { balance: -amount } }
         );
-        
+    
         const updatedUser = await User.findById(userId, { balance: 1 });
+        if (updatedUser && updatedUser?.balance < 0) {
+            updatedUser.balance = 0;
+            await updatedUser.save();
+        }
         return updatedUser?.balance || 0;
     } catch (error) {
         console.error('Error updating user vocal credits', error);
