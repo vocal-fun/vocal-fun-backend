@@ -1,9 +1,10 @@
 import { CreditTransaction } from '../models/vocal';
 import { ethers, WebSocketProvider, BigNumberish, formatUnits, Contract } from 'ethers';
-import { getUserProfile } from './userService';
+import { getUserById, getUserProfile } from './userService';
 import { User } from '../models/user';
 import { sendUserSocketMessage } from '../socket';
 import dotenv from 'dotenv';
+import { config } from '../config';
 
 dotenv.config();
 
@@ -168,3 +169,42 @@ export const vocalCreditListener = async (): Promise<void> => {
         console.error('Error initializing vocal credit listener:', error);
     }
 };
+
+export const mintVocalCredits = async (apiKey: string, address: string, amount: number, provider: string): Promise<any> => {
+    try {
+        let validProvider = false;
+        if (provider == 'glip') {
+            if (apiKey !== config.glip.apiKey) {
+                throw new Error('Authentication failed');
+            }
+            validProvider = true;
+        }
+        if (!validProvider) {
+            throw new Error('Invalid provider');
+        }
+        
+        const user = await getUserById(address.toLowerCase());
+        if (!user) {
+            throw new Error('User not found');
+        }
+        const newCredit = new CreditTransaction({
+                userId: user._id.toString(),
+                userAddress: user.address,
+                creditAmount: amount,
+                txHash: '',
+                txAmount: '',
+                provider: provider
+            });
+            await newCredit.save()
+    
+            await User.updateOne(
+                { _id: user._id },
+                { $inc: { balance: amount } }
+            );
+    
+        return { user };
+    } catch (error) {
+        console.error('Error minting vocal credits', error);
+        throw error;
+    }
+}
