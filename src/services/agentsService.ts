@@ -10,8 +10,9 @@ const VOICE_PREVIEWS_DIR = path.join(__dirname, '..', 'voice_previews');
 
 const AI_NODE_URL = "http://15.206.168.54:8000"
 
-export const getAllAgents = async () => {
-    let agents = await LaunchpadAgent.find({featured: true, active: true})
+export const getAllAgents = async (tag: string = "") => {
+    let tagArray = tag ? tag.split(',') : [];
+    let agents = await LaunchpadAgent.find({featured: true, active: true, tag: {$in: tagArray}})
     let agentConfigs = await agentConfig.find({agent: {$in: agents.map((agent) => agent._id)}})
     return agents.map((agent) => {
         let config = agentConfigs.find((config) => config.agent.toString() === agent._id.toString())
