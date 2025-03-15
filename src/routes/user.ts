@@ -18,6 +18,10 @@ router.get('/', async (req: any, res) => {
     return res.status(401).json({ message: 'Authentication failed or address not provided' });
   }
   let user = await getUserProfile(address.toLowerCase());
+  // fromat balance to 2 decimal places
+  if (user) {
+    user.balance = parseFloat(user.balance.toFixed(2));
+  }
   res.json({ user: user, authenticated: !!req.user });
 });
 
