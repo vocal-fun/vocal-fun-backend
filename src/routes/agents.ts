@@ -6,7 +6,8 @@ export const router = Router();
 router.get('/', async (req, res) => {
   try {
     let tag = req.query.tag as string;
-    let result = await getAllAgents(tag);
+    let featured = req.query.featured === 'true';
+    let result = await getAllAgents(tag, featured);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

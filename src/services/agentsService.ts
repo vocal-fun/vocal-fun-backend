@@ -10,7 +10,7 @@ const VOICE_PREVIEWS_DIR = path.join(__dirname, '..', 'voice_previews');
 
 const AI_NODE_URL = "http://15.206.168.54:8000"
 
-export const getAllAgents = async (tag: string = "") => {
+export const getAllAgents = async (tag: string = "", featured: boolean = true) => {
     let tagArray = tag ? tag.split(',') : [];
     let agents = [];
     if (tagArray.length > 0) {
