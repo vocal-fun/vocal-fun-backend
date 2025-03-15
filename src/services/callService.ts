@@ -55,6 +55,7 @@ export const exchangeVocalCredits = async (thirdPartyToken: string, provider: st
               },
             });
             const data: any = await response.json();
+            console.log(data);
             if (!data.success) {
                 throw new Error('Failed to exchange credits');
             }
