@@ -18,7 +18,7 @@ router.get('/', async (req: any, res) => {
     return res.status(401).json({ message: 'Authentication failed or address not provided' });
   }
   let user = await getUserProfile(address.toLowerCase());
-  res.json({ user: user });
+  res.json({ user: user, authenticated: !!req.user });
 });
 
 const exchangeVocalCreditsSchema = z.object({
