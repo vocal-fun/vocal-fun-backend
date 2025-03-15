@@ -170,9 +170,10 @@ const newCallSocketConnection = async (socket: any) => {
                             balance: updatedBalance,
                             message: 'You have run out of vocal credits. Call will be disconnected.'
                         });
-                        
+
                         socket.emit('call_ending', { 
-                            reason: 'insufficient_credits'
+                            reason: 'insufficient_credits',
+                            message: 'You have run out of vocal credits. Call will be disconnected.'
                         });
                         
                         
