@@ -12,7 +12,12 @@ const AI_NODE_URL = "http://15.206.168.54:8000"
 
 export const getAllAgents = async (tag: string = "") => {
     let tagArray = tag ? tag.split(',') : [];
-    let agents = await LaunchpadAgent.find({featured: true, active: true, tag: {$in: tagArray}})
+    let agents = [];
+    if (tagArray.length > 0) {
+        agents = await LaunchpadAgent.find({featured: true, active: true, tag: {$in: tagArray}})
+    } else {
+        agents = await LaunchpadAgent.find({featured: true, active: true})
+    }
     let agentConfigs = await agentConfig.find({agent: {$in: agents.map((agent) => agent._id)}})
     return agents.map((agent) => {
         let config = agentConfigs.find((config) => config.agent.toString() === agent._id.toString())
