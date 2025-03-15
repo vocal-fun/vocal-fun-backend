@@ -6,7 +6,8 @@ export const router = Router();
 router.get('/', async (req, res) => {
   try {
     let tag = req.query.tag as string;
-    let featured = req.query.featured === 'true';
+    let featuredQuery = req.query.featured;
+    let featured = featuredQuery ? featuredQuery === 'true' : true;
     let result = await getAllAgents(tag, featured);
     res.json(result);
   } catch (error) {
