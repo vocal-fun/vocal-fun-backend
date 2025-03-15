@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth';
 import { getUserProfile } from '../services/userService';
 import { validate } from '../middleware/validate';
 import { exchangeVocalCredits } from '../services/callService';
@@ -7,10 +7,17 @@ import { z } from 'zod';
 
 export const router = Router();
 
-router.use(authMiddleware);
+router.use(optionalAuthMiddleware);
 
 router.get('/', async (req: any, res) => {
-  let user = await getUserProfile(req.user.address)
+  let address = req.query.address;
+  if (!address) {
+    address = req.user.address;
+  }
+  if (!address) {
+    return res.status(401).json({ message: 'Authentication failed or address not provided' });
+  }
+  let user = await getUserProfile(address)
   res.json({ user: user });
 });
 

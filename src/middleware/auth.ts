@@ -63,8 +63,8 @@ export const optionalAuthMiddleware = async (
     const token = req.headers.authorization?.split(' ')[1];
     
     if (!token) {
-      res.status(401).json({ message: 'Authentication required' });
-      return;
+      next();
+      return
     }
 
     const decoded = jwt.verify(token, config.jwt.secret) as { userId: string };
