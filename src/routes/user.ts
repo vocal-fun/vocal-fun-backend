@@ -11,7 +11,7 @@ router.use(optionalAuthMiddleware);
 
 router.get('/', async (req: any, res) => {
   let address = req.query.address;
-  if (!address) {
+  if (req.user) {
     address = req.user.address;
   }
   if (!address) {
