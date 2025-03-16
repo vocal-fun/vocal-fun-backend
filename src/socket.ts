@@ -237,7 +237,8 @@ const newCallSocketConnection = async (socket: any) => {
             sttModel: agentConfig!.sttModel,
             ttsModel: agentConfig!.ttsModel,
             rate: agentConfig!.rate,
-            language: agentConfig!.language
+            language: agentConfig!.language,
+            speed: 1.1
         }
 
         if (client && client == "glip-android") {
