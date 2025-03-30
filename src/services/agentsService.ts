@@ -34,6 +34,8 @@ export const getAgentsFromTags = async (tag: string = "", country: string = "") 
             return true
         })
     }
+    // sort agents by priority
+    agents = agents.sort((a, b) => a.priority - b.priority)
     return fillAgentWithConfig(agents)
 }
 

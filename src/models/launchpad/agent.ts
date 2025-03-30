@@ -17,6 +17,7 @@ export interface ILaunchpadAgent extends Document {
   actualName: string;
   active: boolean;
   tag: string[];
+  priority: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,7 +38,8 @@ const LaunchpadAgentSchema = new Schema({
   featured: { type: Boolean, default: false },
   actualName: { type: String, required: false },
   active: { type: Boolean, default: true },
-  tag: { type: [String], default: [] }
+  tag: { type: [String], default: [] },
+  priority: { type: Number, default: 0 }
 }, {
   timestamps: true
 });
