@@ -6,9 +6,10 @@ export const router = Router();
 router.get('/', async (req, res) => {
   try {
     let tag = req.query.tag as string;
+    let country = req.headers['country'] as string;
     let result
     if (tag) {
-      result = await getAgentsFromTags(tag);
+      result = await getAgentsFromTags(tag, country);
     } else {
       result = await getAllAgents();
     }

@@ -16,13 +16,23 @@ export const getAllAgents = async () => {
     return fillAgentWithConfig(agents)
 }
 
-export const getAgentsFromTags = async (tag: string = "") => {
+export const getAgentsFromTags = async (tag: string = "", country: string = "") => {
     let tagArray = tag ? tag.split(',') : [];
     let agents = [];
     if (tagArray.length > 0) {
         agents = await LaunchpadAgent.find({active: true, tag: {$in: tagArray}})
     } else {
         agents = await LaunchpadAgent.find({active: true})
+    }
+    // if agent tag has region:country, then make sure those agents are only returned if the country matches
+    if (country) {
+        agents = agents.filter((agent) => {
+            let tag = agent.tag.find((t) => t.startsWith('region:'))
+            if (tag) {
+                return tag.split(':')[1] === country
+            }
+            return true
+        })
     }
     return fillAgentWithConfig(agents)
 }
@@ -35,9 +45,19 @@ const fillAgentWithConfig = async (agents: any[]) => {
             ...agent.toObject(),
             image: agent.imageUrl,
             rate: config?.rate,
-            language: config?.language
+            language: config?.language,
+            languageName: languageCodeToName[config?.language as keyof typeof languageCodeToName]
         }
     })
+}
+
+const languageCodeToName = {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "hi": "Hindi",
 }
 
 export const getAgent = async (agentId: string) => {
