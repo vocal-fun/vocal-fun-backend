@@ -256,10 +256,10 @@ const newCallSocketConnection = async (socket: any) => {
             pythonWs.send(JSON.stringify(config));
         });
 
-        pythonWs.on('message', (message: Buffer | string) => {
+        pythonWs.on('message', (message: Buffer) => {
             try {
                 // Check if the message is binary (Buffer)
-                if (Buffer.isBuffer(message)) {
+                if (isBufferBinary(message) == 'binary') {
                     // Forward binary audio data directly to the client
                     // Assuming binary data is always TTS audio stream based on your Python code
                     socket.emit('audio_stream', message);
@@ -365,4 +365,22 @@ const newCallSocketConnection = async (socket: any) => {
         console.error('Error in call socket connection:', e);
         socket.disconnect();
     }
+
+    const isBufferBinary = (buffer: Buffer) => {
+        try {
+            // Try to decode the buffer as a UTF-8 string
+            const decodedString = buffer.toString('utf8');
+            
+            // Check if the buffer is a valid UTF-8 string
+            // If decoding is successful, and the decoded string matches the buffer, it's a string
+            if (decodedString && decodedString === buffer.toString('utf8')) {
+                return 'string';
+            } else {
+                return 'binary';
+            }
+        } catch (err) {
+            // If an error occurs (e.g., invalid UTF-8), it's considered binary
+            return 'binary';
+        }
+    };
 };
