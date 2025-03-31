@@ -256,32 +256,40 @@ const newCallSocketConnection = async (socket: any) => {
             pythonWs.send(JSON.stringify(config));
         });
 
-        pythonWs.on('message', (message: any) => {
+        pythonWs.on('message', (message: Buffer | string) => {
             try {
-                // Parse incoming message from Python server
-                const data = JSON.parse(message.toString());
-                
-                // ai node ready
-                if (data.type == "call_ready") {
-                    // notify client that call is ready
-                    socket.emit('call_ready');
-                }
-
-                if (data.type === 'tts_stream') {
-                    // Forward TTS audio chunks to client
-                    socket.emit('audio_stream', data.data);
-                } if (data.type === 'tts_stream_end') {
-                    console.log('Received TTS stream end');
-                    // notify client that TTS stream has ended
-                    socket.emit('audio_stream_end');
+                // Check if the message is binary (Buffer)
+                if (Buffer.isBuffer(message)) {
+                    // Forward binary audio data directly to the client
+                    // Assuming binary data is always TTS audio stream based on your Python code
+                    socket.emit('audio_stream', message);
                 } else {
-                    // Forward other messages to client
-                    socket.emit('message', data);
+                    // Parse incoming message from Python server
+                    const data = JSON.parse(message.toString());
+                    
+                    // ai node ready
+                    if (data.type == "call_ready") {
+                        // notify client that call is ready
+                        socket.emit('call_ready');
+                    }
+
+                    if (data.type === 'tts_stream') {
+                        // Forward TTS audio chunks to client
+                        socket.emit('audio_stream', data.data);
+                    } if (data.type === 'tts_stream_end') {
+                        console.log('Received TTS stream end');
+                        // notify client that TTS stream has ended
+                        socket.emit('audio_stream_end');
+                    } else {
+                        // Forward other messages to client
+                        socket.emit('message', data);
+                    }
                 }
             } catch (error) {
-                console.error('Error processing message from Python server:', error);
+                console.error('Error processing message from Python server:', error, 'Raw message:', message.toString()); // Log raw message on error
             }
         });
+
 
         pythonWs.on('error', (error: any) => {
             console.error('WebSocket error:', error);
@@ -348,7 +356,7 @@ const newCallSocketConnection = async (socket: any) => {
                 clearInterval(balanceInterval);
             }
             
-            if (pythonWs.readyState === WebSocket.OPEN) {
+            if (pythonWs.readyState === WebSocket.OPEN || pythonWs.readyState === WebSocket.CONNECTING) { // Check connecting state too
                 pythonWs.close();
             }
         });
