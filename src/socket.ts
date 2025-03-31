@@ -93,6 +93,7 @@ const newCallSocketConnection = async (socket: any) => {
         const sessionId = socket.handshake.auth.sessionId as string;
         const client = socket.handshake.auth.client as string;
         const country = socket.handshake.auth.country as string;
+        const audioFormat = socket.handshake.auth.audioFormat as string || "pcm";
 
         let session = await getValidatedSession(sessionId);
         if (!session) {
@@ -238,7 +239,8 @@ const newCallSocketConnection = async (socket: any) => {
             ttsModel: agentConfig!.ttsModel,
             rate: agentConfig!.rate,
             language: agentConfig!.language,
-            speed: 1.1
+            speed: 1.1,
+            format: audioFormat
         }
 
         if (client && client == "glip-android") {
