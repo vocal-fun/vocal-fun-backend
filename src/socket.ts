@@ -258,36 +258,28 @@ const newCallSocketConnection = async (socket: any) => {
 
         pythonWs.on('message', (message: Buffer) => {
             try {
-                // Attempt to parse the buffer as a JSON string
-                const messageString = message.toString();
-                const data = JSON.parse(messageString);
+               // Parse incoming message from Python server
+               const data = JSON.parse(message.toString());
+                    
+               // ai node ready
+               if (data.type == "call_ready") {
+                   // notify client that call is ready
+                   socket.emit('call_ready');
+               }
 
-                // If parsing succeeds, handle it as a JSON message
-                console.log('Received JSON message from Python:', data); // Added for debugging
-
-                // ai node ready
-                if (data.type == "call_ready") {
-                    // notify client that call is ready
-                    socket.emit('call_ready');
-                } else if (data.type === 'tts_stream_end') {
-                    console.log('Received TTS stream end');
-                    // notify client that TTS stream has ended
-                    socket.emit('audio_stream_end');
-                } else {
-                    // Forward other JSON messages to client
-                    socket.emit('message', data);
-                }
-
+               if (data.type === 'audio_stream') {
+                   // Forward TTS audio chunks to client
+                   socket.emit('audio_stream', data.data);
+               } if (data.type === 'audio_stream_end') {
+                   console.log('Received TTS stream end');
+                   // notify client that TTS stream has ended
+                   socket.emit('audio_stream_end');
+               } else {
+                   // Forward other messages to client
+                   socket.emit('message', data);
+               }
             } catch (error) {
-                // If JSON parsing fails, assume it's binary audio data
-                if (error instanceof SyntaxError) {
-                    // console.log('Received binary audio data from Python'); // Optional: uncomment for debugging
-                    // Forward the original buffer directly to the client
-                    socket.emit('audio_stream', message);
-                } else {
-                    // Log other potential errors during processing
-                    console.error('Error processing message from Python server:', error, 'Raw message buffer length:', message.length);
-                }
+                console.error('Error processing message from Python server:', error, 'Raw message:', message.toString()); // Log raw message on error
             }
         });
 
