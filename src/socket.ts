@@ -94,6 +94,7 @@ const newCallSocketConnection = async (socket: any) => {
         const client = socket.handshake.auth.client as string;
         const country = socket.handshake.auth.country as string;
         const audioFormat = socket.handshake.auth.audioFormat as string || "pcm";
+        const vadThreshold = socket.handshake.auth.vadThreshold as number || 0.5;
 
         let session = await getValidatedSession(sessionId);
         if (!session) {
@@ -240,7 +241,8 @@ const newCallSocketConnection = async (socket: any) => {
             rate: agentConfig!.rate,
             language: agentConfig!.language,
             speed: 1.1,
-            format: audioFormat
+            format: audioFormat,
+            vadThreshold: vadThreshold
         }
 
         if (client && client == "glip-android") {
